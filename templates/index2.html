@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chick Detection - Image & Video</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0e0d0d;
+            font-family: Arial, sans-serif;
+        }
+        .main-wrapper {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch;
+            min-height: 100vh;
+            padding: 50px;
+            box-sizing: border-box;
+            background-color: #322727;
+        }
+        .logo-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-color: #ffffff;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        .logo-section img {
+            max-width: 100%;
+            height: auto;
+            max-height: 400px;
+        }
+        .container {
+            flex: 1;
+            background: rgb(221, 32, 32);
+            padding: 30px;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1, h2 {
+            color: #ffffff;
+        }
+        input[type="file"] {
+            margin-bottom: 15px;
+            align-self: center;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #388E3C;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.75), rgba(0, 0, 0, 0));
+            width: 80%;
+            margin: 30px 0;
+        }
+        .result-display {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        video, img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+        .loading, .error {
+            margin-top: 15px;
+            font-weight: bold;
+            color: white;
+        }
+        .loading { color: #279de8; }
+        .error { color: #ffffff; }
+        @media (max-width: 768px) {
+            .main-wrapper {
+                flex-direction: column;
+                padding: 40px;
+                box-sizing: border-box;
+            }
+            .logo-section {
+                padding: 60px;
+                height: 340px;
+                background-color: #ffffff;
+                border-top-right-radius: 10px;
+                border-bottom-right-radius: 0;
+                border-top-left-radius: 10px;
+                border-bottom-left-radius: 0;
+                box-sizing: border-box;
+            }
+            .logo-section img {
+                max-height: 100%;
+                width: auto;
+                object-fit: contain;
+            }
+            .container {
+                padding: 20px;
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 10px;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="logo-section">
+            <img src="/static/1.png" alt="Logo">
+        </div>
+        <div class="container">
+            <h1>Chick Detection</h1>
+            <h2>Upload Image</h2>
+            <form id="imageForm">
+                <input type="file" id="imageInput" accept="image/*" required>
+                <br>
+                <button type="submit">Detect in Image</button>
+            </form>
+            <div class="result-display">
+                <img id="result-image" style="display:none;" alt="Detected Image">
+            </div>
+            <div class="loading" id="loadingImage" style="display:none;">Processing image...</div>
+            <div class="error" id="imageErrorMsg" style="display:none;"></div>
+            <hr>
+            <h2>Upload Video</h2>
+            <form id="videoForm">
+                <input type="file" id="videoInput" accept="video/*" required>
+                <br>
+                <button type="submit">Detect in Video</button>
+            </form>
+            <div class="result-display">
+                <video id="result-video" controls autoplay style="display:none; width: 80%; max-width: 720px;"></video>
+            </div>
+            <div class="loading" id="loadingVideo" style="display:none;">Processing video...</div>
+            <div class="error" id="videoErrorMsg" style="display:none;"></div>
+        </div>
+    </div>
+    <script>
+        const imageForm = document.getElementById('imageForm');
+        const videoForm = document.getElementById('videoForm');
+        const imageInput = document.getElementById('imageInput');
+        const videoInput = document.getElementById('videoInput');
+        const resultImage = document.getElementById('result-image');
+        const resultVideo = document.getElementById('result-video');
+        const loadingImage = document.getElementById('loadingImage');
+        const loadingVideo = document.getElementById('loadingVideo');
+        const imageErrorMsg = document.getElementById('imageErrorMsg');
+        const videoErrorMsg = document.getElementById('videoErrorMsg');
+
+        function resetDisplay(type) {
+            if (type === 'image' || type === 'all') {
+                resultImage.style.display = 'none';
+                resultImage.src = '';
+                loadingImage.style.display = 'none';
+                imageErrorMsg.style.display = 'none';
+                imageErrorMsg.textContent = '';
+            }
+            if (type === 'video' || type === 'all') {
+                resultVideo.style.display = 'none';
+                resultVideo.src = '';
+                loadingVideo.style.display = 'none';
+                videoErrorMsg.style.display = 'none';
+                videoErrorMsg.textContent = '';
+            }
+        }
+
+        imageForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            resetDisplay('all');
+            loadingImage.style.display = 'block';
+            const formData = new FormData();
+            if (imageInput.files.length === 0) {
+                imageErrorMsg.textContent = 'Please select an image file.';
+                imageErrorMsg.style.display = 'block';
+                loadingImage.style.display = 'none';
+                return;
+            }
+            formData.append('file', imageInput.files[0]);
+            try {
+                const res = await fetch('/detect', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    resultImage.src = data.detected_image_url;
+                    resultImage.style.display = 'block';
+                } else {
+                    imageErrorMsg.textContent = data.error || 'Unknown image detection error.';
+                    imageErrorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                imageErrorMsg.textContent = 'Image detection failed: Network error or server unavailable.';
+                imageErrorMsg.style.display = 'block';
+            } finally {
+                loadingImage.style.display = 'none';
+            }
+        });
+
+        videoForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            resetDisplay('all');
+            loadingVideo.style.display = 'block';
+            const formData = new FormData();
+            if (videoInput.files.length === 0) {
+                videoErrorMsg.textContent = 'Please select a video file.';
+                videoErrorMsg.style.display = 'block';
+                loadingVideo.style.display = 'none';
+                return;
+            }
+            formData.append('file', videoInput.files[0]);
+            try {
+                const res = await fetch('/detect_video', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    resultVideo.src = data.detected_video_url;
+                    resultVideo.load();
+                    resultVideo.style.display = 'block';
+                } else {
+                    videoErrorMsg.textContent = data.error || 'Unknown video detection error.';
+                    videoErrorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                videoErrorMsg.textContent = 'Video detection failed: Network error or server unavailable.';
+                videoErrorMsg.style.display = 'block';
+            } finally {
+                loadingVideo.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+path: ../data/chick_dataset/
+
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 2
+
+names: ['Healthy', 'Sick']
+
+# Roboflow metadata (optional, can be removed)
+# roboflow:
+#   workspace: joshua14
+#   project: chick-status-detection
+#   version: 1
+#   license: CC BY 4.0
+#   url: https://app.roboflow.com/joshua14/chick-status-detection/2
