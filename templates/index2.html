@@ -1,1166 +1,1002 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChickDetect – AI Diagnostic System</title>
-    <meta name="description" content="Premium AI-powered poultry health detection system using YOLO deep learning.">
+    <title>ChickDetect AI | Enterprise Diagnostic Platform</title>
+    
+    <!-- Fonts: Inter fallback for SF Pro Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         :root {
-            /* Luxury Minimalist Palette */
-            --bg: #05060a;
-            --surface: #0a0c14;
-            --surface-light: #111420;
-            --gold: #c5a059; /* Refined Champagne Gold */
-            --gold-glow: rgba(197, 160, 89, 0.3);
-            --gold-dim: rgba(197, 160, 89, 0.1);
-            --white: #ffffff;
-            --white-glow: rgba(255, 255, 255, 0.15);
-            --green: #2ecc71;
-            --red: #e74c3c;
-            --text: #ffffff;
-            --text-muted: #8a8f9d;
-            --border: rgba(255, 255, 255, 0.08);
-            --glass: rgba(10, 12, 20, 0.85);
-            --font-main: 'Inter', sans-serif;
-            --font-head: 'Outfit', sans-serif;
+            --bg-base: #080808;
+            --bg-secondary: #111111;
+            --glass-card: rgba(255, 255, 255, 0.04);
+            --glass-card-hover: rgba(255, 255, 255, 0.06);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --gold-primary: #D4AF37;
+            --gold-secondary: #FFD76A;
+            --gold-glow: rgba(212, 175, 55, 0.2);
+            --green: #27D980;
+            --red: #FF5A5F;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B5B5B5;
+            
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             font-family: var(--font-main);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* ===== PARTICLE CANVAS ===== */
-        #particle-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
-        }
-
-        /* ===== LAYOUT ===== */
-        .main-wrapper {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: stretch;
-            min-height: 90vh;
-            padding: 40px;
-            gap: 40px;
-            max-width: 1400px;
-            width: 100%;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== LOGO CARD (Luxury Minimalist) ===== */
-        .logo-section {
-            flex: 0 0 360px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 50px 30px;
-            background: var(--glass);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            position: relative;
             overflow: hidden;
-            box-shadow: 
-                0 30px 60px rgba(0,0,0,0.8),
-                0 0 0 1px rgba(255,255,255,0.05) inset;
-            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-
-        .logo-aura {
-            position: absolute;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        .logo-img-wrapper {
-            position: relative;
-            width: 220px;
-            height: 220px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
+            height: 100vh;
+            width: 100vw;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .logo-section img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
-            z-index: 2;
+        /* ===== UTILITIES ===== */
+        .glass {
+            background: var(--glass-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            transition: all 0.4s var(--ease-out);
         }
-
-        .logo-title {
-            text-align: center;
-        }
-
-        .logo-title h1 {
-            font-family: var(--font-head);
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--white);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .logo-title p {
-            font-family: var(--font-head);
-            font-size: 0.75rem;
-            color: var(--gold);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-top: 8px;
-            opacity: 0.8;
-        }
-
-        /* ===== MAIN CONTAINER ===== */
-        .container {
-            flex: 1;
-            background: var(--glass);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            padding: 60px;
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            box-shadow: 
-                0 30px 60px rgba(0,0,0,0.6),
-                0 0 0 1px rgba(255,255,255,0.03) inset;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Minimal accents */
-        .corner-accent {
-            position: absolute;
-            width: 15px; height: 15px;
-            border-color: var(--gold);
-            border-style: solid;
-            opacity: 0.4;
-        }
-        .corner-accent.tl { top: 20px; left: 20px; border-width: 1.5px 0 0 1.5px; }
-        .corner-accent.tr { top: 20px; right: 20px; border-width: 1.5px 1.5px 0 0; }
-        .corner-accent.bl { bottom: 20px; left: 20px; border-width: 0 0 1.5px 1.5px; }
-        .corner-accent.br { bottom: 20px; right: 20px; border-width: 0 1.5px 1.5px 0; }
-
-        /* ===== SECTION HEADER ===== */
-        .section-header {
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .section-icon {
-            width: 42px; height: 42px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .section-header h2 {
-            font-family: var(--font-head);
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--white);
-            letter-spacing: 1px;
-        }
-
-        /* ===== FILE UPLOAD ===== */
-        .file-upload-wrapper {
-            position: relative;
-            background: rgba(255,255,255,0.015);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: all 0.4s ease;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        .file-upload-wrapper:hover {
-            border-color: var(--gold);
-            background: rgba(197, 160, 89, 0.03);
+        
+        .glass:hover {
+            background: var(--glass-card-hover);
+            border-color: var(--border-hover);
             transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
         }
 
-        .upload-icon {
-            width: 40px; height: 40px;
-            margin-bottom: 15px;
-            opacity: 0.8;
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-center { display: flex; justify-content: center; align-items: center; }
+        .text-gradient {
+            background: linear-gradient(135deg, var(--gold-secondary), var(--gold-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .file-upload-text {
-            font-family: var(--font-head);
-            color: var(--text-muted);
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 var(--gold-glow); }
+            70% { box-shadow: 0 0 0 15px rgba(212,175,55,0); }
+            100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
+        }
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-fade-up { animation: fadeUp 0.8s var(--ease-out) forwards; opacity: 0; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        /* ===== LEFT SIDEBAR (20%) ===== */
+        .sidebar {
+            width: 20%;
+            min-width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+        
+        .brand-logo {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--gold-primary), #A67C00);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px var(--gold-glow);
+            animation: float 4s ease-in-out infinite;
+        }
+        .brand-logo svg { color: #000; width: 24px; height: 24px; }
+        .brand-text h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
+        .brand-text p { font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
             font-size: 0.95rem;
             font-weight: 500;
-        }
-
-        .file-upload-text span {
-            color: var(--gold);
-            font-weight: 700;
-            text-decoration: underline;
-            text-underline-offset: 4px;
-        }
-
-        input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .selected-file-name {
-            display: block;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            font-size: 0.8rem;
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        /* ===== LUXURY BUTTON ===== */
-        .btn-analyze {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            background: var(--gold);
-            color: #000;
-            border: none;
-            padding: 16px 40px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: var(--font-head);
-            font-size: 0.95rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+            cursor: pointer;
         }
-
-        .btn-analyze:hover {
-            background: var(--white);
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(255,255,255,0.15);
+        .nav-item:hover, .nav-item.active {
+            background: var(--glass-card);
+            color: var(--text-primary);
         }
-
-        .btn-icon { width: 18px; height: 18px; fill: currentColor; }
-
-        /* ===== DIVIDER ===== */
-        hr.divider {
-            border: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
-            margin: 40px 0;
+        .nav-item.active {
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
+        .nav-item.active svg { color: var(--gold-primary); }
 
-        /* ===== LOADING SCREEN (Roosters) ===== */
-        .chicken-loader-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: #000; /* Pure black for luxury transition */
+        .status-panel {
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: auto;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .status-item:last-child { margin-bottom: 0; }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        .dot.gold { background: var(--gold-primary); box-shadow: 0 0 8px var(--gold-primary); }
+
+        /* ===== MAIN DASHBOARD (80%) ===== */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
             flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 48px;
+            position: sticky;
+            top: 0;
+            background: rgba(8, 8, 8, 0.8);
+            backdrop-filter: blur(20px);
+            z-index: 50;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+        .header-title h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+        .header-title p { font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px; }
+        
+        .header-actions { display: flex; align-items: center; gap: 24px; }
+        .clock { font-family: monospace; font-size: 0.9rem; color: var(--text-secondary); }
+        .icon-btn {
+            background: var(--glass-card);
+            border: 1px solid var(--border-color);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 30px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .icon-btn:hover { color: var(--text-primary); border-color: var(--gold-primary); transform: scale(1.05); }
+        .avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border: 2px solid var(--border-color);
+            overflow: hidden;
         }
 
-        .chicken-loader-overlay.active { display: flex; }
-
-        .loader-label {
-            font-family: var(--font-head);
-            font-size: 1.4rem;
-            font-weight: 800;
-            letter-spacing: 6px;
-            color: var(--gold);
-            text-align: center;
+        /* Dashboard Grid Layout */
+        .dashboard-content {
+            padding: 0 48px 48px 48px;
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 32px;
         }
 
-        .loader-progress-track {
-            width: 280px;
-            height: 2px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 99px;
-            margin-top: 20px;
-        }
-
-        .loader-progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--gold);
-            animation: progress-fill 2s ease-in-out infinite;
-        }
-
-        @keyframes progress-fill {
-            0%   { width: 0%; }
-            50%  { width: 70%; }
-            100% { width: 95%; }
-        }
-
-        /* Special Running Scene (Premium Upgrade) */
-        .chicken-scene {
-            width: 100%;
-            height: 220px;
+        /* Hero Section */
+        .hero-panel {
+            grid-column: 1 / -1;
+            height: 240px;
+            border-radius: 24px;
             position: relative;
             overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            background: radial-gradient(circle at 100% 50%, rgba(212,175,55,0.08) 0%, transparent 60%), #0d0d0d;
         }
-
-        /* Parallax Tech Grid Background */
-        .chicken-scene::before {
+        
+        /* Neural Grid Background for Hero */
+        .hero-panel::before {
             content: '';
             position: absolute;
             inset: 0;
             background-image: 
-                linear-gradient(rgba(197, 160, 89, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(197, 160, 89, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: grid-scroll 2s linear infinite;
-            opacity: 0.5;
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
         }
 
-        @keyframes grid-scroll {
-            from { background-position: 0 0; }
-            to   { background-position: -40px 0; }
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            position: relative;
+            z-index: 2;
         }
+        .h-stat-block { display: flex; flex-direction: column; gap: 8px; }
+        .h-stat-label { font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .h-stat-value { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+        .h-stat-value.gold { color: var(--gold-primary); text-shadow: 0 0 20px var(--gold-glow); }
+        .h-stat-value.green { color: var(--green); text-shadow: 0 0 20px rgba(39, 217, 128, 0.2); }
 
-        .chicken-run-wrap {
-            position: absolute;
-            bottom: 40px;
-            left: -180px;
-            animation: run-special 2.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-            filter: drop-shadow(0 0 15px var(--gold-glow));
-        }
+        /* Left Column (Main Tools) */
+        .tools-col { display: flex; flex-direction: column; gap: 32px; }
 
-        /* Body Bobbing for Weight */
-        .chicken-svg {
-            width: 120px;
-            height: 120px;
-            animation: bob 0.4s ease-in-out infinite alternate;
+        /* Upload Card */
+        .upload-card {
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            background: rgba(255,255,255,0.01);
+            transition: all 0.4s var(--ease-out);
         }
+        .upload-card:hover, .upload-card.dragover {
+            border-color: var(--gold-primary);
+            background: rgba(212, 175, 55, 0.02);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.05) inset;
+        }
+        .upload-icon-large {
+            width: 64px; height: 64px;
+            background: var(--glass-card);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+            color: var(--gold-primary);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.4s var(--ease-spring);
+        }
+        .upload-card:hover .upload-icon-large { transform: scale(1.1) translateY(-5px); }
+        .upload-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+        .upload-sub { color: var(--text-secondary); font-size: 0.95rem; }
+        .upload-formats { margin-top: 24px; display: inline-flex; gap: 8px; }
+        .format-badge {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        #imageInput, #videoInput { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-        @keyframes run-special {
-            0%   { transform: translateX(-200px) scaleX(1); opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 1; }
-            100% { transform: translateX(calc(100vw + 200px)) scaleX(1.1); opacity: 0; }
+        /* File Preview */
+        #filePreviewArea { display: none; margin-top: 20px; }
+        .preview-box {
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px; border-radius: 12px; background: var(--glass-card);
+            border: 1px solid var(--border-color);
         }
+        .preview-icon { color: var(--gold-primary); }
+        .preview-name { font-weight: 500; font-size: 0.95rem; flex: 1; }
 
-        @keyframes bob {
-            from { transform: translateY(0) rotate(-5deg); }
-            to   { transform: translateY(-12px) rotate(5deg); }
-        }
-
-        .chicken-run-wrap:nth-child(2) { 
-            bottom: 70px; 
-            animation-duration: 1.8s; 
-            animation-delay: -0.4s;
-            opacity: 0.5;
-            filter: blur(1px) brightness(0.7);
-        }
-        
-        .chicken-run-wrap:nth-child(3) { 
-            bottom: 10px; 
-            animation-duration: 2.5s; 
-            animation-delay: -0.8s;
-            opacity: 0.3;
-            filter: blur(2px) brightness(0.5);
-        }
-
-        /* Fluid Leg Cycle */
-        .leg-run-l { 
-            animation: leg-cycle 0.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate; 
-            transform-origin: 35px 64px; 
-        }
-        .leg-run-r { 
-            animation: leg-cycle 0.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate-reverse; 
-            transform-origin: 43px 64px; 
-        }
-
-        @keyframes leg-cycle {
-            0% { transform: rotate(-50deg) scaleY(0.8); }
-            100% { transform: rotate(50deg) scaleY(1.1); }
-        }
-
-        /* Tech Scanline Effect */
-        .scanline {
-            position: absolute;
-            top: 0; left: 0;
-            width: 2px; height: 100%;
-            background: var(--gold);
-            box-shadow: 0 0 15px var(--gold);
-            opacity: 0.3;
-            animation: scan 2s linear infinite;
-        }
-
-        @keyframes scan {
-            from { left: -10%; }
-            to   { left: 110%; }
-        }
-
-        /* Speed lines (Refined) */
-        .speed-line {
-            position: absolute;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            height: 1.5px;
-            opacity: 0.2;
-            border-radius: 99px;
-            animation: wind-pass-fast 0.4s linear infinite;
-        }
-
-        @keyframes wind-pass-fast {
-            from { transform: translateX(100vw) scaleX(0.5); }
-            to   { transform: translateX(-50vw) scaleX(2); }
-        }
-
-        /* ===== ERROR ===== */
-        .error {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(231, 76, 60, 0.1);
-            border-left: 3px solid var(--red);
-            border-radius: 8px;
-            color: #ff9494;
+        /* Target Selection (Pills) */
+        .section-label { font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 16px; margin-top: 32px; }
+        .pill-group { display: flex; flex-wrap: wrap; gap: 12px; }
+        .pill {
+            padding: 12px 24px;
+            border-radius: 100px;
+            background: var(--glass-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
             font-size: 0.9rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .pill:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+        .pill.active {
+            background: rgba(212,175,55,0.1);
+            border-color: var(--gold-primary);
+            color: var(--gold-primary);
+            box-shadow: 0 0 20px rgba(212,175,55,0.15);
+        }
+        .pill-indicator { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 
-        /* ===== RESULT PANELS ===== */
-        .result-display {
+        /* Analyze Button */
+        .analyze-btn {
             width: 100%;
-            display: none;
-            background: rgba(0,0,0,0.4);
-            border-radius: 16px;
-            margin-top: 25px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            flex-direction: column;
-            animation: panel-in 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
-        }
-
-        @keyframes panel-in {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        video, img.detected-img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .result-panel-title {
-            font-family: var(--font-head);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            color: var(--gold);
-            text-transform: uppercase;
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            background: rgba(255,255,255,0.02);
-        }
-
-        /* ===== STAT CARDS ===== */
-        .result-text {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 25px;
-            border-left: 4px solid var(--gold);
-        }
-
-        .stat-card.healthy { border-left-color: var(--green); }
-        .stat-card.sick    { border-left-color: var(--red); }
-
-        .stat-summary {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: var(--text);
-        }
-
-        .stat-badges {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 18px;
-            border-radius: 10px;
-            font-family: var(--font-head);
-            font-size: 0.8rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .badge-healthy { color: var(--green); }
-        .badge-sick    { color: var(--red); }
-        .badge-total   { color: var(--gold); }
-
-        .badge-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            box-shadow: 0 0 10px currentColor;
-        }
-
-        .dual-image-wrapper {
-            display: flex;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .dual-image-wrapper .result-display {
-            flex: 1;
-            margin-top: 0;
-        }
-
-        @media (max-width: 1100px) {
-            .main-wrapper { flex-direction: column; padding: 20px; align-items: center; }
-            .logo-section { width: 100%; max-width: 500px; flex: none; }
-            .container { width: 100%; padding: 40px; }
-            .dual-image-wrapper { flex-direction: column; }
-        }
-
-        /* NEW: Diagnosis Accordion Style */
-        .diagnosis-report {
-            margin-top: 30px;
-            display: none;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            animation: panel-in 0.8s ease backwards;
-        }
-
-        .diagnosis-item {
-            border-bottom: 1px solid var(--border);
-            padding: 15px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .diag-label {
-            font-family: var(--font-head);
-            font-size: 1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .diag-urgency-High { color: #f39c12; }
-        .diag-urgency-Critical { color: #e74c3c; }
-        .diag-urgency-Medium { color: #3498db; }
-        .diag-urgency-None { color: #2ecc71; }
-
-        .diag-details {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-top: 5px;
-        }
-
-        .diag-badge {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.1);
-            font-weight: 800;
-        }
-
-        /* NEW: Primary Prediction Highlight */
-        .primary-diagnosis-banner {
-            background: linear-gradient(90deg, var(--gold-glow), transparent);
-            border-left: 5px solid var(--gold);
             padding: 20px;
-            margin-bottom: 25px;
-            border-radius: 12px;
-            display: none;
-            animation: slide-in 0.5s ease-out;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--gold-secondary), var(--gold-primary));
+            border: none;
+            color: #000;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            margin-top: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.4s var(--ease-spring);
+            box-shadow: 0 10px 30px rgba(212,175,55,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .analyze-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(212,175,55,0.4);
+        }
+        .analyze-btn::after {
+            content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%); transition: transform 0.6s ease;
+        }
+        .analyze-btn:hover::after { transform: translateX(100%); }
+
+        /* Right Column (Insights) */
+        .insights-col { display: flex; flex-direction: column; gap: 32px; }
+        
+        .insight-card { padding: 24px; }
+        .insight-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .insight-header h3 { font-size: 1.1rem; font-weight: 600; }
+        
+        /* Mini Pie Chart Mockup */
+        .pie-chart {
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: conic-gradient(var(--green) 0% 75%, var(--red) 75% 85%, var(--gold-primary) 85% 100%);
+            margin: 0 auto;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .pie-inner {
+            width: 120px; height: 120px;
+            background: var(--bg-base);
+            border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .pie-inner span { font-size: 1.5rem; font-weight: 700; color: var(--green); }
+        .pie-inner p { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
+
+        .legend { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+        .legend-item { display: flex; justify-content: space-between; font-size: 0.85rem; }
+        .legend-label { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+
+        /* Recent Activity Timeline */
+        .timeline { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .tl-item { display: flex; gap: 16px; }
+        .tl-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(39, 217, 128, 0.1); color: var(--green); display: flex; align-items: center; justify-content: center; }
+        .tl-icon.sick { background: rgba(255, 90, 95, 0.1); color: var(--red); }
+        .tl-content h4 { font-size: 0.9rem; font-weight: 500; }
+        .tl-content p { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+        .tl-time { margin-left: auto; font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* Output / Results Area */
+        #resultsArea { display: none; grid-column: 1 / -1; margin-top: 20px; }
+        
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        
+        .image-viewer {
+            width: 100%; border-radius: 16px; overflow: hidden; position: relative;
+            border: 1px solid var(--border-color);
+            background: #000;
+            min-height: 300px;
+        }
+        .image-viewer img, .image-viewer video { width: 100%; height: 100%; object-fit: contain; display: block; }
+        
+        .viewer-label {
+            position: absolute; top: 16px; left: 16px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .primary-diagnosis-banner.sick {
-            background: linear-gradient(90deg, rgba(231, 76, 60, 0.2), transparent);
-            border-left-color: var(--red);
+        .report-card { padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+        .rc-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .diag-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+        .diag-subtitle { color: var(--text-secondary); font-size: 0.95rem; }
+        
+        .risk-badge {
+            padding: 8px 16px; border-radius: 100px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .risk-Critical { background: rgba(255,90,95,0.1); color: var(--red); border: 1px solid rgba(255,90,95,0.2); }
+        .risk-High { background: rgba(212,175,55,0.1); color: var(--gold-primary); border: 1px solid rgba(212,175,55,0.2); }
+        .risk-None { background: rgba(39,217,128,0.1); color: var(--green); border: 1px solid rgba(39,217,128,0.2); }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .sg-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; }
+        .sg-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+        .sg-val { font-size: 1.8rem; font-weight: 700; }
+        
+        .action-row { display: flex; gap: 16px; margin-top: auto; }
+        .btn-secondary {
+            flex: 1; padding: 16px; border-radius: 12px; background: var(--glass-card); border: 1px solid var(--border-color);
+            color: var(--text-primary); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: var(--gold-primary); }
+
+        /* Loader Overlay */
+        #loaderOverlay {
+            position: fixed; inset: 0; background: rgba(8,8,8,0.85); backdrop-filter: blur(10px);
+            z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 64px; height: 64px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--gold-primary);
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-primary); }
+        .loader-sub { font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px; }
+
+        /* Error Banner */
+        #errorBanner {
+            background: rgba(255,90,95,0.1); border: 1px solid var(--red); color: var(--red);
+            padding: 16px; border-radius: 12px; margin-top: 24px; display: none; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
         }
 
-        .primary-diagnosis-banner h3 {
-            font-family: var(--font-head);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
-        .primary-diagnosis-banner div.prediction-text {
-            font-family: var(--font-head);
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--white);
-        }
-
-        @keyframes slide-in {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
     </style>
 </head>
-
 <body>
-    <canvas id="particle-canvas"></canvas>
 
-    <!-- ===== LOADING OVERLAY (Roosters) ===== -->
-    <div class="chicken-loader-overlay" id="chickenLoader">
-        <div class="chicken-scene">
-            <div class="scanline"></div>
-            <div class="speed-line" style="top:15%; width:150px; animation-duration: 0.3s;"></div>
-            <div class="speed-line" style="top:45%; width:250px; animation-duration: 0.5s; animation-delay: -0.2s;"></div>
-            <div class="speed-line" style="top:75%; width:180px; animation-duration: 0.4s; animation-delay: -0.1s;"></div>
-            <div class="speed-line" style="top:30%; width:100px; animation-duration: 0.6s;"></div>
-
-            <!-- ROOSTER RUNNER 1 (Main) -->
-            <div class="chicken-run-wrap">
-                <svg class="chicken-svg" viewBox="0 0 80 80" fill="none" style="filter: drop-shadow(0 0 10px var(--gold-glow));">
-                    <!-- Tech Tail -->
-                    <g class="tail">
-                        <path d="M12,45 Q5,30 2,45 T12,50" fill="var(--gold)" opacity="0.8" />
-                        <path d="M10,48 Q2,35 -2,48 T10,54" fill="var(--gold)" opacity="0.6" />
-                        <path d="M14,42 Q8,25 4,42 T14,48" fill="var(--gold)" opacity="0.4" />
-                    </g>
-                    <!-- Body (Luxury Gold) -->
-                    <ellipse cx="38" cy="50" rx="20" ry="16" fill="var(--gold)" />
-                    <g class="wing">
-                        <ellipse cx="32" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.2)" transform="rotate(-15 32 50)" />
-                    </g>
-                    <!-- Neck -->
-                    <rect x="51" y="34" width="10" height="16" rx="5" fill="var(--gold)" />
-                    <!-- Head & Comb -->
-                    <g class="head-group">
-                        <circle cx="60" cy="30" r="13" fill="var(--gold)" />
-                        <path d="M52,22 L55,10 L58,20 L62,8 L65,19 L70,10 L72,24 Z" fill="#FF3131" />
-                        <ellipse cx="66" cy="38" rx="4" ry="7" fill="#FF3131" />
-                        <!-- Cyber Eye -->
-                        <circle cx="65" cy="28" r="4" fill="#000" />
-                        <circle cx="65" cy="28" r="1.5" fill="#00ffff">
-                            <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
-                        </circle>
-                        <!-- Beak -->
-                        <polygon points="72,28 79,32 72,34" fill="#FFDE59" />
-                    </g>
-                    <!-- Tech Legs -->
-                    <g class="leg-run-l"><line x1="35" y1="64" x2="30" y2="76" stroke="#FFDE59" stroke-width="4" stroke-linecap="round"/></g>
-                    <g class="leg-run-r"><line x1="43" y1="64" x2="46" y2="76" stroke="#FFDE59" stroke-width="4" stroke-linecap="round"/></g>
-                </svg>
-            </div>
-
-            <!-- ROOSTER RUNNER 2 (Background blurred) -->
-            <div class="chicken-run-wrap">
-                <svg class="chicken-svg" viewBox="0 0 80 80" fill="none">
-                    <ellipse cx="38" cy="50" rx="20" ry="16" fill="rgba(197, 160, 89, 0.4)" />
-                    <circle cx="60" cy="30" r="13" fill="rgba(197, 160, 89, 0.4)" />
-                    <g class="leg-run-l"><line x1="35" y1="64" x2="30" y2="76" stroke="rgba(255, 222, 89, 0.4)" stroke-width="4"/></g>
-                    <g class="leg-run-r"><line x1="43" y1="64" x2="46" y2="76" stroke="rgba(255, 222, 89, 0.4)" stroke-width="4"/></g>
-                </svg>
-            </div>
-
-            <!-- ROOSTER RUNNER 3 (Background blurred) -->
-            <div class="chicken-run-wrap">
-                <svg class="chicken-svg" viewBox="0 0 80 80" fill="none">
-                    <ellipse cx="38" cy="50" rx="20" ry="16" fill="rgba(197, 160, 89, 0.2)" />
-                    <circle cx="60" cy="30" r="13" fill="rgba(197, 160, 89, 0.2)" />
-                    <g class="leg-run-l"><line x1="35" y1="64" x2="30" y2="76" stroke="rgba(255, 222, 89, 0.2)" stroke-width="4"/></g>
-                    <g class="leg-run-r"><line x1="43" y1="64" x2="46" y2="76" stroke="rgba(255, 222, 89, 0.2)" stroke-width="4"/></g>
-                </svg>
-            </div>
-        </div>
-
-        <div class="loader-label" id="loaderLabel">SYSTEM SECURING DATA</div>
-        <div class="loader-progress-track">
-            <div class="loader-progress-bar"></div>
-        </div>
+    <!-- Loading Overlay -->
+    <div id="loaderOverlay">
+        <div class="spinner"></div>
+        <div class="loader-text">Neural Network Processing</div>
+        <div class="loader-sub">Analyzing visual data layers...</div>
     </div>
 
-    <div class="main-wrapper">
-        <!-- ===== LOGO PANEL ===== -->
-        <div class="logo-section" id="logoCard">
-            <div class="logo-aura"></div>
-            <div class="logo-img-wrapper">
-                <img src="/static/luxury_logo.png" alt="ChickDetect Logo">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar animate-fade-up">
+        <div class="brand">
+            <div class="brand-logo">
+                <i data-lucide="bird"></i>
             </div>
-            <div class="logo-title">
-                <h1>CHICKDETECT</h1>
-                <p>AI Diagnostic Protocol</p>
+            <div class="brand-text">
+                <h1>ChickDetect</h1>
+                <p>Enterprise AI</p>
             </div>
         </div>
 
-        <!-- ===== MAIN PANEL ===== -->
-        <div class="container">
-            <div class="corner-accent tl"></div>
-            <div class="corner-accent tr"></div>
-            <div class="corner-accent bl"></div>
-            <div class="corner-accent br"></div>
+        <nav class="nav-menu">
+            <a class="nav-item active" onclick="switchTab('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a class="nav-item" onclick="switchTab('live')"><i data-lucide="cctv"></i> Live Monitor</a>
+            <a class="nav-item"><i data-lucide="file-bar-chart-2"></i> Reports</a>
+            <a class="nav-item"><i data-lucide="database"></i> Datasets</a>
+            <a class="nav-item"><i data-lucide="settings"></i> Settings</a>
+        </nav>
 
-            <!-- IMAGE SECTION -->
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                        <rect x="9" y="2" width="4" height="10" rx="2" fill="var(--gold)"/>
-                        <circle cx="12" cy="18" r="4" stroke="var(--white)" stroke-width="2"/>
-                    </svg>
+        <div class="status-panel">
+            <div class="status-item">
+                <span>Model Engine</span>
+                <div class="status-indicator"><div class="dot gold"></div> YOLOv5 Core</div>
+            </div>
+            <div class="status-item">
+                <span>Grad-CAM</span>
+                <div class="status-indicator"><div class="dot green"></div> Ready</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <main class="main-wrapper">
+        <!-- HEADER -->
+        <header class="top-header animate-fade-up delay-1">
+            <div class="header-title">
+                <h2>Diagnostic Protocol</h2>
+                <p>Avian Health Intelligence Platform</p>
+            </div>
+            <div class="header-actions">
+                <div class="clock" id="liveClock">00:00:00</div>
+                <button class="icon-btn"><i data-lucide="bell"></i></button>
+                <div class="avatar"></div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-content" id="dashboardView">
+            
+            <!-- HERO -->
+            <div class="hero-panel animate-fade-up delay-2">
+                <div class="hero-stats">
+                    <div class="h-stat-block">
+                        <span class="h-stat-label">AI Confidence Limit</span>
+                        <span class="h-stat-value gold">99.7<span style="font-size:1.5rem">%</span></span>
+                    </div>
+                    <div class="h-stat-block">
+                        <span class="h-stat-label">System Status</span>
+                        <span class="h-stat-value green">OPTIMAL</span>
+                    </div>
+                    <div class="h-stat-block">
+                        <span class="h-stat-label">Active Scans</span>
+                        <span class="h-stat-value">142</span>
+                    </div>
                 </div>
-                <h2>Image Intelligence</h2>
             </div>
 
-            <form id="imageForm">
-                <div class="file-upload-wrapper" id="imageDropZone">
-                    <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
-                        <rect x="4" y="14" width="40" height="28" rx="6" stroke="var(--gold)" stroke-width="2.5"/>
-                        <circle cx="24" cy="27" r="7" stroke="var(--white)" stroke-width="2"/>
-                    </svg>
-                    <div class="file-upload-text">Upload diagnostic image or <span>Browse</span></div>
-                    <input type="file" id="imageInput" accept="image/*" required>
-                </div>
-                <div class="selected-file-name" id="imageFileName"></div>
+            <!-- LEFT COL (Upload & Config) -->
+            <div class="tools-col animate-fade-up delay-3">
+                <form id="aiForm">
+                    <div class="glass" style="padding: 32px;">
+                        
+                        <div class="upload-card" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                            <div class="upload-icon-large"><i data-lucide="upload-cloud" style="width: 32px; height: 32px;"></i></div>
+                            <h3 class="upload-title text-gradient">Secure Drop Zone</h3>
+                            <p class="upload-sub">Drag & drop poultry imagery or video</p>
+                            <div class="upload-formats">
+                                <span class="format-badge">JPG</span>
+                                <span class="format-badge">PNG</span>
+                                <span class="format-badge">MP4</span>
+                            </div>
+                            <input type="file" id="fileInput" accept="image/*,video/*" required>
+                        </div>
+
+                        <div id="filePreviewArea">
+                            <div class="preview-box">
+                                <i data-lucide="file-image" class="preview-icon"></i>
+                                <span class="preview-name" id="fileNameDisp">filename.jpg</span>
+                                <i data-lucide="x" style="cursor: pointer; color: var(--text-secondary);" onclick="clearFile()"></i>
+                            </div>
+                        </div>
+
+                        <h4 class="section-label">Diagnostic Targeting</h4>
+                        <div class="pill-group" id="targetGroup">
+                            <div class="pill" data-val="0" onclick="selectPill(this)"><div class="pill-indicator" style="color:var(--green);"></div>Healthy</div>
+                            <div class="pill active" data-val="1" onclick="selectPill(this)"><div class="pill-indicator" style="color:var(--red);"></div>Sick / Anomalies</div>
+                        </div>
+                        <input type="hidden" id="targetClassId" value="1">
+
+                        <button type="submit" class="analyze-btn">
+                            <i data-lucide="cpu"></i> Initiate AI Analysis
+                        </button>
+                        
+                        <div id="errorBanner">
+                            <i data-lucide="alert-triangle"></i> <span id="errorMsgText">Error processing data.</span>
+                        </div>
+                    </div>
+                </form>
                 
-                <div id="heatmapControls" style="margin-top: 15px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
-                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;">Target Heatmap Class:</label>
-                    <select id="targetClassId" style="background: var(--surface-light); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: var(--font-main); outline: none;">
-                        <option value="0">Healthy</option>
-                        <option value="1" selected>Sick</option>
-                    </select>
+                <!-- RESULTS AREA -->
+                <div id="resultsArea" class="animate-fade-up">
+                    <div class="result-grid">
+                        <!-- Visuals -->
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                            <div class="image-viewer">
+                                <div class="viewer-label">Detection Layer</div>
+                                <img id="resImg" style="display:none;">
+                                <video id="resVid" style="display:none;" controls autoplay loop muted></video>
+                            </div>
+                            <div class="image-viewer" id="camViewer" style="display:none;">
+                                <div class="viewer-label text-gradient">Grad-CAM Map</div>
+                                <img id="camImg">
+                            </div>
+                        </div>
+
+                        <!-- Report Card -->
+                        <div class="glass report-card">
+                            <div class="rc-header">
+                                <div>
+                                    <h3 class="diag-title" id="diagTitle">Primary Diagnosis</h3>
+                                    <p class="diag-subtitle" id="diagSub">Neural processing complete.</p>
+                                </div>
+                                <div class="risk-badge risk-None" id="diagRisk">
+                                    <i data-lucide="shield-check" id="riskIcon"></i> <span id="riskText">Secure</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-grid">
+                                <div class="sg-box">
+                                    <div class="sg-label">Total Indexed</div>
+                                    <div class="sg-val" id="statTotal">0</div>
+                                </div>
+                                <div class="sg-box">
+                                    <div class="sg-label" style="color:var(--red);">Anomalies</div>
+                                    <div class="sg-val" id="statAnom">0</div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 16px;">
+                                <h4 class="sg-label" style="margin-bottom:12px;">Protocol Recommendation</h4>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;" id="diagProtocol">
+                                    Continue standard biosecurity measures. Monitor feed intake.
+                                </p>
+                            </div>
+
+                            <div class="action-row">
+                                <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">
+                                    <i data-lucide="refresh-cw"></i> Scan New
+                                </button>
+                                <button class="btn-secondary" style="border-color: var(--gold-primary); color: var(--gold-primary);">
+                                    <i data-lucide="download"></i> PDF Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-analyze" id="imageSubmitBtn">
-                    Analyze Image
-                </button>
-            </form>
-
-            <div class="error" id="imageErrorMsg"></div>
-
-            <div class="result-text" id="imageResultText" style="margin-top: 15px;"></div>
-
-            <!-- NEW: PRIMARY PREDICTION BANNER -->
-            <div id="primaryDiagnosisBanner" class="primary-diagnosis-banner">
-                <h3>System Primary Diagnosis</h3>
-                <div class="prediction-text" id="primaryDiagnosisText">Analyzing...</div>
             </div>
 
-            <div class="dual-image-wrapper" id="dualImageContainer">
-                <div class="result-display" id="imageResultContainer">
-                    <div class="result-panel-title">Neural Output</div>
-                    <img id="result-image" class="detected-img" alt="Result">
+            <!-- RIGHT COL (Insights) -->
+            <div class="insights-col animate-fade-up delay-3">
+                <div class="glass insight-card">
+                    <div class="insight-header">
+                        <h3>Global Architecture</h3>
+                        <i data-lucide="more-horizontal" style="color: var(--text-secondary);"></i>
+                    </div>
+                    
+                    <div class="pie-chart">
+                        <div class="pie-inner">
+                            <span>84%</span>
+                            <p>Healthy</p>
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-label"><div class="dot green"></div> Healthy</div>
+                            <span style="font-weight: 600;">84%</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-label"><div class="dot" style="background:var(--red);"></div> Sick</div>
+                            <span style="font-weight: 600;">12%</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-label"><div class="dot gold"></div> Suspicious</div>
+                            <span style="font-weight: 600;">4%</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="result-display" id="camResultContainer">
-                    <div class="result-panel-title">Probability Map</div>
-                    <img id="cam-result-image" class="detected-img" alt="CAM">
+
+                <div class="glass insight-card" style="flex:1;">
+                    <div class="insight-header">
+                        <h3>System Event Log</h3>
+                    </div>
+                    <div class="timeline">
+                        <div class="tl-item">
+                            <div class="tl-icon"><i data-lucide="check"></i></div>
+                            <div class="tl-content">
+                                <h4>Batch Scan Complete</h4>
+                                <p>Sector 4 cleared</p>
+                            </div>
+                            <span class="tl-time">2m</span>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-icon sick"><i data-lucide="alert-circle"></i></div>
+                            <div class="tl-content">
+                                <h4 style="color:var(--text-primary);">Anomaly Detected</h4>
+                                <p>Coccidiosis risk in Sector 2</p>
+                            </div>
+                            <span class="tl-time">14m</span>
+                        </div>
+                        <div class="tl-item">
+                            <div class="tl-icon"><i data-lucide="check"></i></div>
+                            <div class="tl-content">
+                                <h4>Hardware Sync</h4>
+                                <p>YOLOv5 weights updated</p>
+                            </div>
+                            <span class="tl-time">1h</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="result-text" id="imageResultText"></div>
 
-            <hr class="divider">
-            
-            <!-- LIVE WEBCAM SECTION -->
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="9" stroke="var(--gold)" stroke-width="2"/>
-                        <circle cx="12" cy="12" r="3" fill="var(--white)"/>
-                        <path d="M12 3 L12 5 M12 19 L12 21 M3 12 L5 12 M19 12 L21 12" stroke="var(--gold)" stroke-width="2"/>
-                    </svg>
-                </div>
-                <h2>Live Neural Monitor</h2>
-            </div>
-
-            <div class="webcam-controls" style="margin-bottom: 20px; display: flex; gap: 15px;">
-                <button id="startWebcam" class="btn-analyze" style="width: auto; padding: 12px 25px; background: var(--green); color: #000;">
-                    Start Live Monitor
-                </button>
-                <button id="stopWebcam" class="btn-analyze" style="width: auto; padding: 12px 25px; background: var(--red); color: var(--white); display: none;">
-                    Stop Monitor
-                </button>
-            </div>
-
-            <div class="result-display" id="webcamResultContainer" style="display: none; border-color: var(--gold); border-width: 2px;">
-                <div class="result-panel-title">Real-Time Processing Feed</div>
-                <img id="webcam-feed" src="" alt="Webcam Feed" style="width: 100%; height: auto;">
-            </div>
-
-            <hr class="divider">
-
-            <!-- VIDEO SECTION -->
-            <div class="section-header">
-                <div class="section-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                        <rect x="2" y="6" width="14" height="12" rx="2" stroke="var(--gold)" stroke-width="2"/>
-                        <path d="M16 10 L22 7 V17 L16 14Z" fill="var(--white)"/>
-                    </svg>
-                </div>
-                <h2>Video Stream Data</h2>
-            </div>
-
-            <form id="videoForm">
-                <div class="file-upload-wrapper" id="videoDropZone">
-                    <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
-                        <rect x="6" y="10" width="36" height="28" rx="5" stroke="var(--gold)" stroke-width="2.5"/>
-                        <polygon points="19,18 19,30 31,24" fill="var(--white)"/>
-                    </svg>
-                    <div class="file-upload-text">Upload video feed for <span>Neural Processing</span></div>
-                    <input type="file" id="videoInput" accept="video/*" required>
-                </div>
-                <span class="selected-file-name" id="videoFileName"></span>
-                <button type="submit" class="btn-analyze" id="videoSubmitBtn">
-                    Process Video Feed
-                </button>
-            </form>
-
-            <div class="error" id="videoErrorMsg"></div>
-
-            <div class="result-display" id="videoResultContainer">
-                <div class="result-panel-title">Processed Feed</div>
-                <video id="result-video" controls autoplay></video>
-            </div>
-            
-            <!-- NEW: DIAGNOSIS REPORT ZONE -->
-            <div id="diagnosisReport" class="diagnosis-report">
-                <div class="result-panel-title">Diagnostic Neural Insights</div>
-                <div id="diagnosisContent"></div>
-            </div>
-
-            <div class="result-text" id="videoResultText"></div>
         </div>
-    </div>
+        
+        <!-- LIVE VIEW (Hidden by default) -->
+        <div class="dashboard-content" id="liveView" style="display: none;">
+             <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 24px;">
+                 
+                 <div class="glass" style="padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+                     <div>
+                         <h3 style="font-size: 1.2rem; font-weight: 600;">Neural Camera Feed</h3>
+                         <p style="color: var(--text-secondary); font-size: 0.9rem;">Real-time inference matrix</p>
+                     </div>
+                     <button class="analyze-btn" style="width: auto; margin-top: 0; padding: 12px 32px;" id="startLiveBtn">
+                         <i data-lucide="play"></i> Initiate Uplink
+                     </button>
+                     <button class="analyze-btn" style="width: auto; margin-top: 0; padding: 12px 32px; background: var(--bg-base); color: var(--red); border: 1px solid var(--red); display:none;" id="stopLiveBtn">
+                         <i data-lucide="square"></i> Terminate
+                     </button>
+                 </div>
+
+                 <div class="image-viewer" style="min-height: 600px; border-width: 2px; border-color: var(--gold-glow);">
+                     <div class="viewer-label text-gradient" style="z-index: 10;">Live Feed</div>
+                     
+                     <!-- CSS Scanline overlay -->
+                     <div id="liveScanline" style="display:none; position:absolute; top:0; left:0; right:0; height:4px; background:var(--gold-primary); box-shadow:0 0 20px var(--gold-primary); z-index:5; animation:scanline 3s linear infinite;"></div>
+                     
+                     <img id="liveFeedImg" style="width:100%; height:100%; object-fit: cover; display:none;">
+                     
+                     <div id="liveStandby" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; color:var(--text-secondary);">
+                         <i data-lucide="camera-off" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                         <p style="font-weight: 500; letter-spacing: 2px;">STANDBY MODE</p>
+                     </div>
+                 </div>
+                 
+             </div>
+        </div>
+    </main>
 
     <script>
-        /* ========= PARTICLE BACKGROUND ========= */
-        (function () {
-            const canvas = document.getElementById('particle-canvas');
-            const ctx = canvas.getContext('2d');
-            let W, H, particles = [];
+        // Initialize Icons
+        lucide.createIcons();
 
-            function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+        // Real-time clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
 
-            function Particle() {
-                this.x = Math.random() * W;
-                this.y = Math.random() * H;
-                this.r = Math.random() * 1.5 + 0.5;
-                this.vx = (Math.random() - 0.5) * 0.2;
-                this.vy = (Math.random() - 0.5) * 0.2;
-                this.alpha = Math.random() * 0.4 + 0.1;
-                this.color = `rgba(255,255,255,${this.alpha})`;
+        // Tab Switching
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if (tab === 'dashboard') {
+                document.getElementById('dashboardView').style.display = 'grid';
+                document.getElementById('liveView').style.display = 'none';
+            } else if (tab === 'live') {
+                document.getElementById('dashboardView').style.display = 'none';
+                document.getElementById('liveView').style.display = 'block';
             }
+        }
 
-            Particle.prototype.update = function () {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0) this.x = W; if (this.x > W) this.x = 0;
-                if (this.y < 0) this.y = H; if (this.y > H) this.y = 0;
-            };
+        // File Drag & Drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreviewArea');
+        const fileNameDisp = document.getElementById('fileNameDisp');
 
-            function init() {
-                resize();
-                particles = Array.from({ length: 80 }, () => new Particle());
-            }
-
-            function draw() {
-                ctx.clearRect(0, 0, W, H);
-                particles.forEach(p => { 
-                    p.update(); 
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); 
-                    ctx.fillStyle = p.color; ctx.fill(); 
-                });
-                requestAnimationFrame(draw);
-            }
-
-            window.addEventListener('resize', resize);
-            init(); draw();
-        })();
-
-        /* ========= LOGO TILT ========= */
-        (function () {
-            const card = document.getElementById('logoCard');
-            if (card) {
-                card.addEventListener('mousemove', function (e) {
-                    const rect = card.getBoundingClientRect();
-                    const dx = (e.clientX - rect.left - rect.width/2) / (rect.width/2);
-                    const dy = (e.clientY - rect.top - rect.height/2) / (rect.height/2);
-                    card.style.transform = `perspective(1000px) rotateY(${dx*5}deg) rotateX(${-dy*5}deg)`;
-                });
-                card.addEventListener('mouseleave', function() {
-                    card.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg)`;
-                });
-            }
-        })();
-
-        /* ========= WEBCAM LOGIC ========= */
-        (function() {
-            const startBtn = document.getElementById('startWebcam');
-            const stopBtn = document.getElementById('stopWebcam');
-            const feedImg = document.getElementById('webcam-feed');
-            const container = document.getElementById('webcamResultContainer');
-
-            startBtn.addEventListener('click', () => {
-                feedImg.src = '/video_feed';
-                container.style.display = 'flex';
-                startBtn.style.display = 'none';
-                stopBtn.style.display = 'block';
-            });
-
-            stopBtn.addEventListener('click', () => {
-                feedImg.src = '';
-                container.style.display = 'none';
-                startBtn.style.display = 'block';
-                stopBtn.style.display = 'none';
-            });
-        })();
-
-        /* ========= DOM REFS ========= */
-        const imageForm = document.getElementById('imageForm');
-        const videoForm = document.getElementById('videoForm');
-        const imageInput = document.getElementById('imageInput');
-        const videoInput = document.getElementById('videoInput');
-        const imageFileName = document.getElementById('imageFileName');
-        const videoFileName = document.getElementById('videoFileName');
-        const imageResultContainer = document.getElementById('imageResultContainer');
-        const resultImage = document.getElementById('result-image');
-        const imageResultText = document.getElementById('imageResultText');
-        const videoResultContainer = document.getElementById('videoResultContainer');
-        const resultVideo = document.getElementById('result-video');
-        const videoResultText = document.getElementById('videoResultText');
-        const imageErrorMsg = document.getElementById('imageErrorMsg');
-        const videoErrorMsg = document.getElementById('videoErrorMsg');
-        const chickenLoader = document.getElementById('chickenLoader');
-        const loaderLabel = document.getElementById('loaderLabel');
-
-        imageInput.addEventListener('change', function () {
-            imageFileName.textContent = this.files.length ? `Ready: ${this.files[0].name}` : '';
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
         });
-        videoInput.addEventListener('change', function () {
-            videoFileName.textContent = this.files.length ? `Ready: ${this.files[0].name}` : '';
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
         });
 
-        function showLoader(label) {
-            loaderLabel.textContent = label;
-            chickenLoader.classList.add('active');
-        }
-
-        function hideLoader() {
-            chickenLoader.classList.remove('active');
-        }
-
-        function renderStats(element, data) {
-            const counts = data.counts || { 'Healthy': data.healthy_count, 'Sick': data.unhealthy_count };
-            const total = data.total_count;
-            const sick = data.unhealthy_count;
-            const healthy = data.healthy_count;
-            
-            element.style.display = 'block';
-            let cls = 'mixed', summary = '';
-            if (sick > 0 && healthy === 0) {
-                cls = 'sick';
-                summary = `Neural analysis identifies ${sick} subjects with diagnostic irregularities. Status: CRITICAL.`;
-            } else if (healthy > 0 && sick === 0) {
-                cls = 'healthy';
-                summary = `All ${healthy} detected subjects successfully cleared diagnostic protocols. Status: OPTIMAL.`;
-            } else {
-                cls = 'mixed';
-                summary = `Diagnostic mix detected. Total subjects indexed: ${total}.`;
-            }
-
-            let badgesHtml = '';
-            for (const [label, count] of Object.entries(counts)) {
-                if (count === 0 && label !== 'Healthy') continue;
-                let badgeCls = 'badge-total';
-                if (label === 'Healthy') badgeCls = 'badge-healthy';
-                else badgeCls = 'badge-sick';
-                
-                badgesHtml += `<span class="badge ${badgeCls}"><span class="badge-dot"></span>${label} &nbsp;${count}</span>`;
-            }
-            badgesHtml += `<span class="badge badge-total"><span class="badge-dot"></span>Total &nbsp;${total}</span>`;
-
-            element.innerHTML = `
-                <div class="stat-card ${cls}">
-                    <p class="stat-summary">${summary}</p>
-                    <div class="stat-badges">
-                        ${badgesHtml}
-                    </div>
-                </div>`;
-            
-            // Render Diagnosis Report if info is available
-            if (data.disease_info) {
-                renderDiagnosis(data.disease_info);
-            }
-
-            // Render Primary Banner
-            const banner = document.getElementById('primaryDiagnosisBanner');
-            const bText = document.getElementById('primaryDiagnosisText');
-            if (data.primary_diagnosis) {
-                banner.style.display = 'block';
-                bText.textContent = data.primary_diagnosis;
-                if (data.primary_diagnosis !== 'Healthy') {
-                    banner.classList.add('sick');
-                } else {
-                    banner.classList.remove('sick');
-                }
-            } else {
-                banner.style.display = 'none';
+        dropZone.addEventListener('drop', handleDrop, false);
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if(files.length) {
+                fileInput.files = files;
+                updateFileDisplay();
             }
         }
+        fileInput.addEventListener('change', updateFileDisplay);
 
-        function renderDiagnosis(diseaseInfo) {
-            const report = document.getElementById('diagnosisReport');
-            const content = document.getElementById('diagnosisContent');
-            content.innerHTML = '';
-            
-            let hasInfo = false;
-            for (const [name, info] of Object.entries(diseaseInfo)) {
-                if (!info.symptoms) continue;
-                hasInfo = true;
-                
-                const item = document.createElement('div');
-                item.className = 'diagnosis-item';
-                item.innerHTML = `
-                    <div class="diag-label diag-urgency-${info.urgency}">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        ${name} 
-                        <span class="diag-badge">Urgency: ${info.urgency}</span>
-                    </div>
-                    <div class="diag-details">
-                        <strong>Symptoms:</strong> ${info.symptoms}<br>
-                        <strong>Prevention:</strong> ${info.prevention}
-                    </div>
-                `;
-                content.appendChild(item);
-            }
-            
-            if (hasInfo) {
-                report.style.display = 'block';
-            } else {
-                report.style.display = 'none';
+        function updateFileDisplay() {
+            if(fileInput.files.length) {
+                dropZone.style.display = 'none';
+                filePreview.style.display = 'block';
+                fileNameDisp.textContent = fileInput.files[0].name;
             }
         }
-
-        function resetDisplay(type) {
-            if (type === 'image' || type === 'all') {
-                imageResultContainer.style.display = 'none';
-                document.getElementById('camResultContainer').style.display = 'none';
-                imageResultText.style.display = 'none';
-                imageErrorMsg.style.display = 'none';
-                document.getElementById('diagnosisReport').style.display = 'none';
-            }
-            if (type === 'video' || type === 'all') {
-                videoResultContainer.style.display = 'none';
-                videoResultText.style.display = 'none';
-                videoErrorMsg.style.display = 'none';
-            }
+        function clearFile() {
+            fileInput.value = '';
+            dropZone.style.display = 'block';
+            filePreview.style.display = 'none';
         }
 
-        imageForm.addEventListener('submit', async function (e) {
+        // Pills Selection
+        function selectPill(el) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('targetClassId').value = el.getAttribute('data-val');
+        }
+
+        // Loader logic
+        const loader = document.getElementById('loaderOverlay');
+        function showLoader() { loader.style.display = 'flex'; }
+        function hideLoader() { loader.style.display = 'none'; }
+
+        // Form Submission
+        document.getElementById('aiForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            resetDisplay('image');
-            if (!imageInput.files.length) return;
-            showLoader('CALIBRATING NEURAL ENGINE');
+            if(!fileInput.files.length) return;
+            
+            const file = fileInput.files[0];
+            const isVideo = file.type.startsWith('video/');
+            const endpoint = isVideo ? '/detect_video' : '/detect';
+            
+            document.getElementById('errorBanner').style.display = 'none';
+            document.getElementById('resultsArea').style.display = 'none';
+            showLoader();
+
             const fd = new FormData();
-            fd.append('file', imageInput.files[0]);
-            fd.append('target_class_id', document.getElementById('targetClassId').value);
+            fd.append('file', file);
+            if(!isVideo) {
+                fd.append('target_class_id', document.getElementById('targetClassId').value);
+            }
+
             try {
-                const res  = await fetch('/detect', { method: 'POST', body: fd });
+                const res = await fetch(endpoint, { method: 'POST', body: fd });
                 const data = await res.json();
+                
                 if (data.success) {
-                    resultImage.src = data.detected_image_url;
-                    imageResultContainer.style.display = 'flex';
-                    if (data.cam_image_url) {
-                        document.getElementById('cam-result-image').src = data.cam_image_url;
-                        document.getElementById('camResultContainer').style.display = 'flex';
+                    displayResults(data, isVideo);
+                } else {
+                    showError(data.error || 'API malfunction detected.');
+                }
+            } catch(err) {
+                showError('Network topology error. Backend unreachable.');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        function showError(msg) {
+            document.getElementById('errorMsgText').textContent = msg;
+            document.getElementById('errorBanner').style.display = 'flex';
+        }
+
+        function displayResults(data, isVideo) {
+            document.getElementById('resultsArea').style.display = 'block';
+            
+            const resImg = document.getElementById('resImg');
+            const resVid = document.getElementById('resVid');
+            const camViewer = document.getElementById('camViewer');
+            const camImg = document.getElementById('camImg');
+
+            // Reset media
+            resImg.style.display = 'none';
+            resVid.style.display = 'none';
+            camViewer.style.display = 'none';
+
+            if (isVideo) {
+                resVid.src = data.detected_video_url;
+                resVid.style.display = 'block';
+            } else {
+                resImg.src = data.detected_image_url;
+                resImg.style.display = 'block';
+                if (data.cam_image_url) {
+                    camImg.src = data.cam_image_url;
+                    camViewer.style.display = 'block';
+                }
+            }
+
+            // Update Stats
+            document.getElementById('statTotal').textContent = data.total_count || 0;
+            const sickCount = data.unhealthy_count || 0;
+            document.getElementById('statAnom').textContent = sickCount;
+
+            // Update Report Card
+            const titleEl = document.getElementById('diagTitle');
+            const subEl = document.getElementById('diagSub');
+            const riskBadge = document.getElementById('diagRisk');
+            const riskIcon = document.getElementById('riskIcon');
+            const riskText = document.getElementById('riskText');
+            const protocolEl = document.getElementById('diagProtocol');
+
+            const primary = data.primary_diagnosis || 'Unknown';
+            titleEl.textContent = primary;
+            
+            // Risk logic
+            riskBadge.className = 'risk-badge';
+            if (sickCount > 0) {
+                riskBadge.classList.add(primary.includes('New Castle') ? 'risk-Critical' : 'risk-High');
+                riskText.textContent = primary.includes('New Castle') ? 'CRITICAL' : 'ACTION REQUIRED';
+                riskIcon.setAttribute('data-lucide', 'alert-triangle');
+                titleEl.style.color = 'var(--red)';
+                
+                // Fetch first illness protocol
+                let protocol = "Isolate affected subjects immediately. Consult veterinarian.";
+                if(data.disease_info) {
+                    for(let key in data.disease_info) {
+                        if(key !== 'Healthy' && data.disease_info[key].prevention) {
+                            protocol = `Symptoms: ${data.disease_info[key].symptoms}<br><br>Action: ${data.disease_info[key].prevention}`;
+                            break;
+                        }
                     }
-                    renderStats(imageResultText, data);
-                } else {
-                    imageErrorMsg.textContent = data.error || 'Diagnostic protocol failed.';
-                    imageErrorMsg.style.display = 'block';
                 }
-            } catch (err) {
-                imageErrorMsg.textContent = 'Hardware communication interrupt.';
-                imageErrorMsg.style.display = 'block';
-            } finally { hideLoader(); }
+                protocolEl.innerHTML = protocol;
+
+            } else {
+                riskBadge.classList.add('risk-None');
+                riskText.textContent = 'SECURE';
+                riskIcon.setAttribute('data-lucide', 'shield-check');
+                titleEl.style.color = 'var(--green)';
+                protocolEl.innerHTML = "No anomalies detected. Continue standard nutritional and biosecurity protocols.";
+            }
+            
+            subEl.textContent = `Scanned ${data.total_count} entities with Neural Engine`;
+            lucide.createIcons(); // re-init dynamic icons
+        }
+
+        // Live View Logic
+        const btnStartLive = document.getElementById('startLiveBtn');
+        const btnStopLive = document.getElementById('stopLiveBtn');
+        const feedImg = document.getElementById('liveFeedImg');
+        const liveStandby = document.getElementById('liveStandby');
+        const scanline = document.getElementById('liveScanline');
+
+        btnStartLive.addEventListener('click', () => {
+            feedImg.src = '/video_feed';
+            feedImg.style.display = 'block';
+            liveStandby.style.display = 'none';
+            scanline.style.display = 'block';
+            btnStartLive.style.display = 'none';
+            btnStopLive.style.display = 'flex';
         });
 
-        videoForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            resetDisplay('video');
-            if (!videoInput.files.length) return;
-            showLoader('PROCESSING VISION FEED');
-            const fd = new FormData();
-            fd.append('file', videoInput.files[0]);
-            try {
-                const res  = await fetch('/detect_video', { method: 'POST', body: fd });
-                const data = await res.json();
-                if (data.success) {
-                    resultVideo.src = data.detected_video_url;
-                    resultVideo.load();
-                    videoResultContainer.style.display = 'flex';
-                    renderStats(videoResultText, data);
-                } else {
-                    videoErrorMsg.textContent = data.error || 'Diagnostic protocol failed.';
-                    videoErrorMsg.style.display = 'block';
-                }
-            } catch (err) {
-                videoErrorMsg.textContent = 'Vision stream interrupt.';
-                videoErrorMsg.style.display = 'block';
-            } finally { hideLoader(); }
+        btnStopLive.addEventListener('click', () => {
+            feedImg.src = '';
+            feedImg.style.display = 'none';
+            liveStandby.style.display = 'flex';
+            scanline.style.display = 'none';
+            btnStartLive.style.display = 'flex';
+            btnStopLive.style.display = 'none';
         });
+
     </script>
 </body>
 </html>
