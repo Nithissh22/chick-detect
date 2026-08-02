@@ -1,255 +1,1165 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chick Detection - Image & Video</title>
+    <title>ChickDetect – AI Diagnostic System</title>
+    <meta name="description" content="Premium AI-powered poultry health detection system using YOLO deep learning.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0e0d0d;
-            font-family: Arial, sans-serif;
+        :root {
+            /* Luxury Minimalist Palette */
+            --bg: #05060a;
+            --surface: #0a0c14;
+            --surface-light: #111420;
+            --gold: #c5a059; /* Refined Champagne Gold */
+            --gold-glow: rgba(197, 160, 89, 0.3);
+            --gold-dim: rgba(197, 160, 89, 0.1);
+            --white: #ffffff;
+            --white-glow: rgba(255, 255, 255, 0.15);
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --text: #ffffff;
+            --text-muted: #8a8f9d;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(10, 12, 20, 0.85);
+            --font-main: 'Inter', sans-serif;
+            --font-head: 'Outfit', sans-serif;
         }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            font-family: var(--font-main);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== PARTICLE CANVAS ===== */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ===== LAYOUT ===== */
         .main-wrapper {
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: stretch;
-            min-height: 100vh;
-            padding: 50px;
-            box-sizing: border-box;
-            background-color: #322727;
+            min-height: 90vh;
+            padding: 40px;
+            gap: 40px;
+            max-width: 1400px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
         }
+
+        /* ===== LOGO CARD (Luxury Minimalist) ===== */
         .logo-section {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background-color: #ffffff;
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-        }
-        .logo-section img {
-            max-width: 100%;
-            height: auto;
-            max-height: 400px;
-        }
-        .container {
-            flex: 1;
-            background: rgb(221, 32, 32);
-            padding: 30px;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex: 0 0 360px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 50px 30px;
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.8),
+                0 0 0 1px rgba(255,255,255,0.05) inset;
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
-        h1, h2 {
-            color: #ffffff;
+
+        .logo-aura {
+            position: absolute;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
         }
-        input[type="file"] {
-            margin-bottom: 15px;
-            align-self: center;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #388E3C;
-        }
-        hr {
-            border: 0;
-            height: 1px;
-            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.75), rgba(0, 0, 0, 0));
-            width: 80%;
-            margin: 30px 0;
-        }
-        .result-display {
-            margin-top: 20px;
-            width: 100%;
+
+        .logo-img-wrapper {
+            position: relative;
+            width: 220px;
+            height: 220px;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+            z-index: 2;
+        }
+
+        .logo-title {
+            text-align: center;
+        }
+
+        .logo-title h1 {
+            font-family: var(--font-head);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-title p {
+            font-family: var(--font-head);
+            font-size: 0.75rem;
+            color: var(--gold);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            flex: 1;
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            padding: 60px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.6),
+                0 0 0 1px rgba(255,255,255,0.03) inset;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Minimal accents */
+        .corner-accent {
+            position: absolute;
+            width: 15px; height: 15px;
+            border-color: var(--gold);
+            border-style: solid;
+            opacity: 0.4;
+        }
+        .corner-accent.tl { top: 20px; left: 20px; border-width: 1.5px 0 0 1.5px; }
+        .corner-accent.tr { top: 20px; right: 20px; border-width: 1.5px 1.5px 0 0; }
+        .corner-accent.bl { bottom: 20px; left: 20px; border-width: 0 0 1.5px 1.5px; }
+        .corner-accent.br { bottom: 20px; right: 20px; border-width: 0 1.5px 1.5px 0; }
+
+        /* ===== SECTION HEADER ===== */
+        .section-header {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
-        video, img {
+
+        .section-header h2 {
+            font-family: var(--font-head);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 1px;
+        }
+
+        /* ===== FILE UPLOAD ===== */
+        .file-upload-wrapper {
+            position: relative;
+            background: rgba(255,255,255,0.015);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--gold);
+            background: rgba(197, 160, 89, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            width: 40px; height: 40px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .file-upload-text {
+            font-family: var(--font-head);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .file-upload-text span {
+            color: var(--gold);
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .selected-file-name {
+            display: block;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* ===== LUXURY BUTTON ===== */
+        .btn-analyze {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: var(--font-head);
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+        }
+
+        .btn-analyze:hover {
+            background: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(255,255,255,0.15);
+        }
+
+        .btn-icon { width: 18px; height: 18px; fill: currentColor; }
+
+        /* ===== DIVIDER ===== */
+        hr.divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            margin: 40px 0;
+        }
+
+        /* ===== LOADING SCREEN (Roosters) ===== */
+        .chicken-loader-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #000; /* Pure black for luxury transition */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .chicken-loader-overlay.active { display: flex; }
+
+        .loader-label {
+            font-family: var(--font-head);
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: var(--gold);
+            text-align: center;
+        }
+
+        .loader-progress-track {
+            width: 280px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 99px;
+            margin-top: 20px;
+        }
+
+        .loader-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--gold);
+            animation: progress-fill 2s ease-in-out infinite;
+        }
+
+        @keyframes progress-fill {
+            0%   { width: 0%; }
+            50%  { width: 70%; }
+            100% { width: 95%; }
+        }
+
+        /* Special Running Scene (Premium Upgrade) */
+        .chicken-scene {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, rgba(197, 160, 89, 0.05) 0%, transparent 70%);
+        }
+
+        /* Parallax Tech Grid Background */
+        .chicken-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(197, 160, 89, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(197, 160, 89, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: grid-scroll 2s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes grid-scroll {
+            from { background-position: 0 0; }
+            to   { background-position: -40px 0; }
+        }
+
+        .chicken-run-wrap {
+            position: absolute;
+            bottom: 40px;
+            left: -180px;
+            animation: run-special 2.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            filter: drop-shadow(0 0 15px var(--gold-glow));
+        }
+
+        /* Body Bobbing for Weight */
+        .chicken-svg {
+            width: 120px;
+            height: 120px;
+            animation: bob 0.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes run-special {
+            0%   { transform: translateX(-200px) scaleX(1); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateX(calc(100vw + 200px)) scaleX(1.1); opacity: 0; }
+        }
+
+        @keyframes bob {
+            from { transform: translateY(0) rotate(-5deg); }
+            to   { transform: translateY(-12px) rotate(5deg); }
+        }
+
+        .chicken-run-wrap:nth-child(2) { 
+            bottom: 70px; 
+            animation-duration: 1.8s; 
+            animation-delay: -0.4s;
+            opacity: 0.5;
+            filter: blur(1px) brightness(0.7);
+        }
+        
+        .chicken-run-wrap:nth-child(3) { 
+            bottom: 10px; 
+            animation-duration: 2.5s; 
+            animation-delay: -0.8s;
+            opacity: 0.3;
+            filter: blur(2px) brightness(0.5);
+        }
+
+        /* Fluid Leg Cycle */
+        .leg-run-l { 
+            animation: leg-cycle 0.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate; 
+            transform-origin: 35px 64px; 
+        }
+        .leg-run-r { 
+            animation: leg-cycle 0.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate-reverse; 
+            transform-origin: 43px 64px; 
+        }
+
+        @keyframes leg-cycle {
+            0% { transform: rotate(-50deg) scaleY(0.8); }
+            100% { transform: rotate(50deg) scaleY(1.1); }
+        }
+
+        /* Tech Scanline Effect */
+        .scanline {
+            position: absolute;
+            top: 0; left: 0;
+            width: 2px; height: 100%;
+            background: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            opacity: 0.3;
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            from { left: -10%; }
+            to   { left: 110%; }
+        }
+
+        /* Speed lines (Refined) */
+        .speed-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            height: 1.5px;
+            opacity: 0.2;
+            border-radius: 99px;
+            animation: wind-pass-fast 0.4s linear infinite;
+        }
+
+        @keyframes wind-pass-fast {
+            from { transform: translateX(100vw) scaleX(0.5); }
+            to   { transform: translateX(-50vw) scaleX(2); }
+        }
+
+        /* ===== ERROR ===== */
+        .error {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 3px solid var(--red);
+            border-radius: 8px;
+            color: #ff9494;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* ===== RESULT PANELS ===== */
+        .result-display {
+            width: 100%;
+            display: none;
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+            margin-top: 25px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            flex-direction: column;
+            animation: panel-in 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+
+        @keyframes panel-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        video, img.detected-img {
             max-width: 100%;
             height: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            display: block;
         }
-        .loading, .error {
-            margin-top: 15px;
-            font-weight: bold;
-            color: white;
+
+        .result-panel-title {
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            color: var(--gold);
+            text-transform: uppercase;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
         }
-        .loading { color: #279de8; }
-        .error { color: #ffffff; }
-        @media (max-width: 768px) {
-            .main-wrapper {
-                flex-direction: column;
-                padding: 40px;
-                box-sizing: border-box;
-            }
-            .logo-section {
-                padding: 60px;
-                height: 340px;
-                background-color: #ffffff;
-                border-top-right-radius: 10px;
-                border-bottom-right-radius: 0;
-                border-top-left-radius: 10px;
-                border-bottom-left-radius: 0;
-                box-sizing: border-box;
-            }
-            .logo-section img {
-                max-height: 100%;
-                width: auto;
-                object-fit: contain;
-            }
-            .container {
-                padding: 20px;
-                border-top-right-radius: 0;
-                border-bottom-right-radius: 10px;
-                border-top-left-radius: 0;
-                border-bottom-left-radius: 10px;
-            }
+
+        /* ===== STAT CARDS ===== */
+        .result-text {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .stat-card.healthy { border-left-color: var(--green); }
+        .stat-card.sick    { border-left-color: var(--red); }
+
+        .stat-summary {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .stat-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .badge-healthy { color: var(--green); }
+        .badge-sick    { color: var(--red); }
+        .badge-total   { color: var(--gold); }
+
+        .badge-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .dual-image-wrapper {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .dual-image-wrapper .result-display {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        @media (max-width: 1100px) {
+            .main-wrapper { flex-direction: column; padding: 20px; align-items: center; }
+            .logo-section { width: 100%; max-width: 500px; flex: none; }
+            .container { width: 100%; padding: 40px; }
+            .dual-image-wrapper { flex-direction: column; }
+        }
+
+        /* NEW: Diagnosis Accordion Style */
+        .diagnosis-report {
+            margin-top: 30px;
+            display: none;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            animation: panel-in 0.8s ease backwards;
+        }
+
+        .diagnosis-item {
+            border-bottom: 1px solid var(--border);
+            padding: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .diag-label {
+            font-family: var(--font-head);
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diag-urgency-High { color: #f39c12; }
+        .diag-urgency-Critical { color: #e74c3c; }
+        .diag-urgency-Medium { color: #3498db; }
+        .diag-urgency-None { color: #2ecc71; }
+
+        .diag-details {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-top: 5px;
+        }
+
+        .diag-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            font-weight: 800;
+        }
+
+        /* NEW: Primary Prediction Highlight */
+        .primary-diagnosis-banner {
+            background: linear-gradient(90deg, var(--gold-glow), transparent);
+            border-left: 5px solid var(--gold);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            display: none;
+            animation: slide-in 0.5s ease-out;
+        }
+
+        .primary-diagnosis-banner.sick {
+            background: linear-gradient(90deg, rgba(231, 76, 60, 0.2), transparent);
+            border-left-color: var(--red);
+        }
+
+        .primary-diagnosis-banner h3 {
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .primary-diagnosis-banner div.prediction-text {
+            font-family: var(--font-head);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--white);
+        }
+
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
     </style>
 </head>
+
 <body>
-    <div class="main-wrapper">
-        <div class="logo-section">
-            <img src="/static/1.png" alt="Logo">
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- ===== LOADING OVERLAY (Roosters) ===== -->
+    <div class="chicken-loader-overlay" id="chickenLoader">
+        <div class="chicken-scene">
+            <div class="scanline"></div>
+            <div class="speed-line" style="top:15%; width:150px; animation-duration: 0.3s;"></div>
+            <div class="speed-line" style="top:45%; width:250px; animation-duration: 0.5s; animation-delay: -0.2s;"></div>
+            <div class="speed-line" style="top:75%; width:180px; animation-duration: 0.4s; animation-delay: -0.1s;"></div>
+            <div class="speed-line" style="top:30%; width:100px; animation-duration: 0.6s;"></div>
+
+            <!-- ROOSTER RUNNER 1 (Main) -->
+            <div class="chicken-run-wrap">
+                <svg class="chicken-svg" viewBox="0 0 80 80" fill="none" style="filter: drop-shadow(0 0 10px var(--gold-glow));">
+                    <!-- Tech Tail -->
+                    <g class="tail">
+                        <path d="M12,45 Q5,30 2,45 T12,50" fill="var(--gold)" opacity="0.8" />
+                        <path d="M10,48 Q2,35 -2,48 T10,54" fill="var(--gold)" opacity="0.6" />
+                        <path d="M14,42 Q8,25 4,42 T14,48" fill="var(--gold)" opacity="0.4" />
+                    </g>
+                    <!-- Body (Luxury Gold) -->
+                    <ellipse cx="38" cy="50" rx="20" ry="16" fill="var(--gold)" />
+                    <g class="wing">
+                        <ellipse cx="32" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.2)" transform="rotate(-15 32 50)" />
+                    </g>
+                    <!-- Neck -->
+                    <rect x="51" y="34" width="10" height="16" rx="5" fill="var(--gold)" />
+                    <!-- Head & Comb -->
+                    <g class="head-group">
+                        <circle cx="60" cy="30" r="13" fill="var(--gold)" />
+                        <path d="M52,22 L55,10 L58,20 L62,8 L65,19 L70,10 L72,24 Z" fill="#FF3131" />
+                        <ellipse cx="66" cy="38" rx="4" ry="7" fill="#FF3131" />
+                        <!-- Cyber Eye -->
+                        <circle cx="65" cy="28" r="4" fill="#000" />
+                        <circle cx="65" cy="28" r="1.5" fill="#00ffff">
+                            <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
+                        </circle>
+                        <!-- Beak -->
+                        <polygon points="72,28 79,32 72,34" fill="#FFDE59" />
+                    </g>
+                    <!-- Tech Legs -->
+                    <g class="leg-run-l"><line x1="35" y1="64" x2="30" y2="76" stroke="#FFDE59" stroke-width="4" stroke-linecap="round"/></g>
+                    <g class="leg-run-r"><line x1="43" y1="64" x2="46" y2="76" stroke="#FFDE59" stroke-width="4" stroke-linecap="round"/></g>
+                </svg>
+            </div>
+
+            <!-- ROOSTER RUNNER 2 (Background blurred) -->
+            <div class="chicken-run-wrap">
+                <svg class="chicken-svg" viewBox="0 0 80 80" fill="none">
+                    <ellipse cx="38" cy="50" rx="20" ry="16" fill="rgba(197, 160, 89, 0.4)" />
+                    <circle cx="60" cy="30" r="13" fill="rgba(197, 160, 89, 0.4)" />
+                    <g class="leg-run-l"><line x1="35" y1="64" x2="30" y2="76" stroke="rgba(255, 222, 89, 0.4)" stroke-width="4"/></g>
+                    <g class="leg-run-r"><line x1="43" y1="64" x2="46" y2="76" stroke="rgba(255, 222, 89, 0.4)" stroke-width="4"/></g>
+                </svg>
+            </div>
+
+            <!-- ROOSTER RUNNER 3 (Background blurred) -->
+            <div class="chicken-run-wrap">
+                <svg class="chicken-svg" viewBox="0 0 80 80" fill="none">
+                    <ellipse cx="38" cy="50" rx="20" ry="16" fill="rgba(197, 160, 89, 0.2)" />
+                    <circle cx="60" cy="30" r="13" fill="rgba(197, 160, 89, 0.2)" />
+                    <g class="leg-run-l"><line x1="35" y1="64" x2="30" y2="76" stroke="rgba(255, 222, 89, 0.2)" stroke-width="4"/></g>
+                    <g class="leg-run-r"><line x1="43" y1="64" x2="46" y2="76" stroke="rgba(255, 222, 89, 0.2)" stroke-width="4"/></g>
+                </svg>
+            </div>
         </div>
-        <div class="container">
-            <h1>Chick Detection</h1>
-            <h2>Upload Image</h2>
-            <form id="imageForm">
-                <input type="file" id="imageInput" accept="image/*" required>
-                <br>
-                <button type="submit">Detect in Image</button>
-            </form>
-            <div class="result-display">
-                <img id="result-image" style="display:none;" alt="Detected Image">
-            </div>
-            <div class="loading" id="loadingImage" style="display:none;">Processing image...</div>
-            <div class="error" id="imageErrorMsg" style="display:none;"></div>
-            <hr>
-            <h2>Upload Video</h2>
-            <form id="videoForm">
-                <input type="file" id="videoInput" accept="video/*" required>
-                <br>
-                <button type="submit">Detect in Video</button>
-            </form>
-            <div class="result-display">
-                <video id="result-video" controls autoplay style="display:none; width: 80%; max-width: 720px;"></video>
-            </div>
-            <div class="loading" id="loadingVideo" style="display:none;">Processing video...</div>
-            <div class="error" id="videoErrorMsg" style="display:none;"></div>
+
+        <div class="loader-label" id="loaderLabel">SYSTEM SECURING DATA</div>
+        <div class="loader-progress-track">
+            <div class="loader-progress-bar"></div>
         </div>
     </div>
+
+    <div class="main-wrapper">
+        <!-- ===== LOGO PANEL ===== -->
+        <div class="logo-section" id="logoCard">
+            <div class="logo-aura"></div>
+            <div class="logo-img-wrapper">
+                <img src="/static/luxury_logo.png" alt="ChickDetect Logo">
+            </div>
+            <div class="logo-title">
+                <h1>CHICKDETECT</h1>
+                <p>AI Diagnostic Protocol</p>
+            </div>
+        </div>
+
+        <!-- ===== MAIN PANEL ===== -->
+        <div class="container">
+            <div class="corner-accent tl"></div>
+            <div class="corner-accent tr"></div>
+            <div class="corner-accent bl"></div>
+            <div class="corner-accent br"></div>
+
+            <!-- IMAGE SECTION -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <rect x="9" y="2" width="4" height="10" rx="2" fill="var(--gold)"/>
+                        <circle cx="12" cy="18" r="4" stroke="var(--white)" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h2>Image Intelligence</h2>
+            </div>
+
+            <form id="imageForm">
+                <div class="file-upload-wrapper" id="imageDropZone">
+                    <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
+                        <rect x="4" y="14" width="40" height="28" rx="6" stroke="var(--gold)" stroke-width="2.5"/>
+                        <circle cx="24" cy="27" r="7" stroke="var(--white)" stroke-width="2"/>
+                    </svg>
+                    <div class="file-upload-text">Upload diagnostic image or <span>Browse</span></div>
+                    <input type="file" id="imageInput" accept="image/*" required>
+                </div>
+                <div class="selected-file-name" id="imageFileName"></div>
+                
+                <div id="heatmapControls" style="margin-top: 15px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;">Target Heatmap Class:</label>
+                    <select id="targetClassId" style="background: var(--surface-light); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: var(--font-main); outline: none;">
+                        <option value="0">Healthy</option>
+                        <option value="1" selected>Sick</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-analyze" id="imageSubmitBtn">
+                    Analyze Image
+                </button>
+            </form>
+
+            <div class="error" id="imageErrorMsg"></div>
+
+            <div class="result-text" id="imageResultText" style="margin-top: 15px;"></div>
+
+            <!-- NEW: PRIMARY PREDICTION BANNER -->
+            <div id="primaryDiagnosisBanner" class="primary-diagnosis-banner">
+                <h3>System Primary Diagnosis</h3>
+                <div class="prediction-text" id="primaryDiagnosisText">Analyzing...</div>
+            </div>
+
+            <div class="dual-image-wrapper" id="dualImageContainer">
+                <div class="result-display" id="imageResultContainer">
+                    <div class="result-panel-title">Neural Output</div>
+                    <img id="result-image" class="detected-img" alt="Result">
+                </div>
+                <div class="result-display" id="camResultContainer">
+                    <div class="result-panel-title">Probability Map</div>
+                    <img id="cam-result-image" class="detected-img" alt="CAM">
+                </div>
+            </div>
+            <div class="result-text" id="imageResultText"></div>
+
+            <hr class="divider">
+            
+            <!-- LIVE WEBCAM SECTION -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="9" stroke="var(--gold)" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="3" fill="var(--white)"/>
+                        <path d="M12 3 L12 5 M12 19 L12 21 M3 12 L5 12 M19 12 L21 12" stroke="var(--gold)" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h2>Live Neural Monitor</h2>
+            </div>
+
+            <div class="webcam-controls" style="margin-bottom: 20px; display: flex; gap: 15px;">
+                <button id="startWebcam" class="btn-analyze" style="width: auto; padding: 12px 25px; background: var(--green); color: #000;">
+                    Start Live Monitor
+                </button>
+                <button id="stopWebcam" class="btn-analyze" style="width: auto; padding: 12px 25px; background: var(--red); color: var(--white); display: none;">
+                    Stop Monitor
+                </button>
+            </div>
+
+            <div class="result-display" id="webcamResultContainer" style="display: none; border-color: var(--gold); border-width: 2px;">
+                <div class="result-panel-title">Real-Time Processing Feed</div>
+                <img id="webcam-feed" src="" alt="Webcam Feed" style="width: 100%; height: auto;">
+            </div>
+
+            <hr class="divider">
+
+            <!-- VIDEO SECTION -->
+            <div class="section-header">
+                <div class="section-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="6" width="14" height="12" rx="2" stroke="var(--gold)" stroke-width="2"/>
+                        <path d="M16 10 L22 7 V17 L16 14Z" fill="var(--white)"/>
+                    </svg>
+                </div>
+                <h2>Video Stream Data</h2>
+            </div>
+
+            <form id="videoForm">
+                <div class="file-upload-wrapper" id="videoDropZone">
+                    <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
+                        <rect x="6" y="10" width="36" height="28" rx="5" stroke="var(--gold)" stroke-width="2.5"/>
+                        <polygon points="19,18 19,30 31,24" fill="var(--white)"/>
+                    </svg>
+                    <div class="file-upload-text">Upload video feed for <span>Neural Processing</span></div>
+                    <input type="file" id="videoInput" accept="video/*" required>
+                </div>
+                <span class="selected-file-name" id="videoFileName"></span>
+                <button type="submit" class="btn-analyze" id="videoSubmitBtn">
+                    Process Video Feed
+                </button>
+            </form>
+
+            <div class="error" id="videoErrorMsg"></div>
+
+            <div class="result-display" id="videoResultContainer">
+                <div class="result-panel-title">Processed Feed</div>
+                <video id="result-video" controls autoplay></video>
+            </div>
+            
+            <!-- NEW: DIAGNOSIS REPORT ZONE -->
+            <div id="diagnosisReport" class="diagnosis-report">
+                <div class="result-panel-title">Diagnostic Neural Insights</div>
+                <div id="diagnosisContent"></div>
+            </div>
+
+            <div class="result-text" id="videoResultText"></div>
+        </div>
+    </div>
+
     <script>
+        /* ========= PARTICLE BACKGROUND ========= */
+        (function () {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let W, H, particles = [];
+
+            function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+
+            function Particle() {
+                this.x = Math.random() * W;
+                this.y = Math.random() * H;
+                this.r = Math.random() * 1.5 + 0.5;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = (Math.random() - 0.5) * 0.2;
+                this.alpha = Math.random() * 0.4 + 0.1;
+                this.color = `rgba(255,255,255,${this.alpha})`;
+            }
+
+            Particle.prototype.update = function () {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0) this.x = W; if (this.x > W) this.x = 0;
+                if (this.y < 0) this.y = H; if (this.y > H) this.y = 0;
+            };
+
+            function init() {
+                resize();
+                particles = Array.from({ length: 80 }, () => new Particle());
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                particles.forEach(p => { 
+                    p.update(); 
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); 
+                    ctx.fillStyle = p.color; ctx.fill(); 
+                });
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            init(); draw();
+        })();
+
+        /* ========= LOGO TILT ========= */
+        (function () {
+            const card = document.getElementById('logoCard');
+            if (card) {
+                card.addEventListener('mousemove', function (e) {
+                    const rect = card.getBoundingClientRect();
+                    const dx = (e.clientX - rect.left - rect.width/2) / (rect.width/2);
+                    const dy = (e.clientY - rect.top - rect.height/2) / (rect.height/2);
+                    card.style.transform = `perspective(1000px) rotateY(${dx*5}deg) rotateX(${-dy*5}deg)`;
+                });
+                card.addEventListener('mouseleave', function() {
+                    card.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg)`;
+                });
+            }
+        })();
+
+        /* ========= WEBCAM LOGIC ========= */
+        (function() {
+            const startBtn = document.getElementById('startWebcam');
+            const stopBtn = document.getElementById('stopWebcam');
+            const feedImg = document.getElementById('webcam-feed');
+            const container = document.getElementById('webcamResultContainer');
+
+            startBtn.addEventListener('click', () => {
+                feedImg.src = '/video_feed';
+                container.style.display = 'flex';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+            });
+
+            stopBtn.addEventListener('click', () => {
+                feedImg.src = '';
+                container.style.display = 'none';
+                startBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+            });
+        })();
+
+        /* ========= DOM REFS ========= */
         const imageForm = document.getElementById('imageForm');
         const videoForm = document.getElementById('videoForm');
         const imageInput = document.getElementById('imageInput');
         const videoInput = document.getElementById('videoInput');
+        const imageFileName = document.getElementById('imageFileName');
+        const videoFileName = document.getElementById('videoFileName');
+        const imageResultContainer = document.getElementById('imageResultContainer');
         const resultImage = document.getElementById('result-image');
+        const imageResultText = document.getElementById('imageResultText');
+        const videoResultContainer = document.getElementById('videoResultContainer');
         const resultVideo = document.getElementById('result-video');
-        const loadingImage = document.getElementById('loadingImage');
-        const loadingVideo = document.getElementById('loadingVideo');
+        const videoResultText = document.getElementById('videoResultText');
         const imageErrorMsg = document.getElementById('imageErrorMsg');
         const videoErrorMsg = document.getElementById('videoErrorMsg');
+        const chickenLoader = document.getElementById('chickenLoader');
+        const loaderLabel = document.getElementById('loaderLabel');
 
-        function resetDisplay(type) {
-            if (type === 'image' || type === 'all') {
-                resultImage.style.display = 'none';
-                resultImage.src = '';
-                loadingImage.style.display = 'none';
-                imageErrorMsg.style.display = 'none';
-                imageErrorMsg.textContent = '';
+        imageInput.addEventListener('change', function () {
+            imageFileName.textContent = this.files.length ? `Ready: ${this.files[0].name}` : '';
+        });
+        videoInput.addEventListener('change', function () {
+            videoFileName.textContent = this.files.length ? `Ready: ${this.files[0].name}` : '';
+        });
+
+        function showLoader(label) {
+            loaderLabel.textContent = label;
+            chickenLoader.classList.add('active');
+        }
+
+        function hideLoader() {
+            chickenLoader.classList.remove('active');
+        }
+
+        function renderStats(element, data) {
+            const counts = data.counts || { 'Healthy': data.healthy_count, 'Sick': data.unhealthy_count };
+            const total = data.total_count;
+            const sick = data.unhealthy_count;
+            const healthy = data.healthy_count;
+            
+            element.style.display = 'block';
+            let cls = 'mixed', summary = '';
+            if (sick > 0 && healthy === 0) {
+                cls = 'sick';
+                summary = `Neural analysis identifies ${sick} subjects with diagnostic irregularities. Status: CRITICAL.`;
+            } else if (healthy > 0 && sick === 0) {
+                cls = 'healthy';
+                summary = `All ${healthy} detected subjects successfully cleared diagnostic protocols. Status: OPTIMAL.`;
+            } else {
+                cls = 'mixed';
+                summary = `Diagnostic mix detected. Total subjects indexed: ${total}.`;
             }
-            if (type === 'video' || type === 'all') {
-                resultVideo.style.display = 'none';
-                resultVideo.src = '';
-                loadingVideo.style.display = 'none';
-                videoErrorMsg.style.display = 'none';
-                videoErrorMsg.textContent = '';
+
+            let badgesHtml = '';
+            for (const [label, count] of Object.entries(counts)) {
+                if (count === 0 && label !== 'Healthy') continue;
+                let badgeCls = 'badge-total';
+                if (label === 'Healthy') badgeCls = 'badge-healthy';
+                else badgeCls = 'badge-sick';
+                
+                badgesHtml += `<span class="badge ${badgeCls}"><span class="badge-dot"></span>${label} &nbsp;${count}</span>`;
+            }
+            badgesHtml += `<span class="badge badge-total"><span class="badge-dot"></span>Total &nbsp;${total}</span>`;
+
+            element.innerHTML = `
+                <div class="stat-card ${cls}">
+                    <p class="stat-summary">${summary}</p>
+                    <div class="stat-badges">
+                        ${badgesHtml}
+                    </div>
+                </div>`;
+            
+            // Render Diagnosis Report if info is available
+            if (data.disease_info) {
+                renderDiagnosis(data.disease_info);
+            }
+
+            // Render Primary Banner
+            const banner = document.getElementById('primaryDiagnosisBanner');
+            const bText = document.getElementById('primaryDiagnosisText');
+            if (data.primary_diagnosis) {
+                banner.style.display = 'block';
+                bText.textContent = data.primary_diagnosis;
+                if (data.primary_diagnosis !== 'Healthy') {
+                    banner.classList.add('sick');
+                } else {
+                    banner.classList.remove('sick');
+                }
+            } else {
+                banner.style.display = 'none';
             }
         }
 
-        imageForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            resetDisplay('all');
-            loadingImage.style.display = 'block';
-            const formData = new FormData();
-            if (imageInput.files.length === 0) {
-                imageErrorMsg.textContent = 'Please select an image file.';
-                imageErrorMsg.style.display = 'block';
-                loadingImage.style.display = 'none';
-                return;
+        function renderDiagnosis(diseaseInfo) {
+            const report = document.getElementById('diagnosisReport');
+            const content = document.getElementById('diagnosisContent');
+            content.innerHTML = '';
+            
+            let hasInfo = false;
+            for (const [name, info] of Object.entries(diseaseInfo)) {
+                if (!info.symptoms) continue;
+                hasInfo = true;
+                
+                const item = document.createElement('div');
+                item.className = 'diagnosis-item';
+                item.innerHTML = `
+                    <div class="diag-label diag-urgency-${info.urgency}">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        ${name} 
+                        <span class="diag-badge">Urgency: ${info.urgency}</span>
+                    </div>
+                    <div class="diag-details">
+                        <strong>Symptoms:</strong> ${info.symptoms}<br>
+                        <strong>Prevention:</strong> ${info.prevention}
+                    </div>
+                `;
+                content.appendChild(item);
             }
-            formData.append('file', imageInput.files[0]);
+            
+            if (hasInfo) {
+                report.style.display = 'block';
+            } else {
+                report.style.display = 'none';
+            }
+        }
+
+        function resetDisplay(type) {
+            if (type === 'image' || type === 'all') {
+                imageResultContainer.style.display = 'none';
+                document.getElementById('camResultContainer').style.display = 'none';
+                imageResultText.style.display = 'none';
+                imageErrorMsg.style.display = 'none';
+                document.getElementById('diagnosisReport').style.display = 'none';
+            }
+            if (type === 'video' || type === 'all') {
+                videoResultContainer.style.display = 'none';
+                videoResultText.style.display = 'none';
+                videoErrorMsg.style.display = 'none';
+            }
+        }
+
+        imageForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            resetDisplay('image');
+            if (!imageInput.files.length) return;
+            showLoader('CALIBRATING NEURAL ENGINE');
+            const fd = new FormData();
+            fd.append('file', imageInput.files[0]);
+            fd.append('target_class_id', document.getElementById('targetClassId').value);
             try {
-                const res = await fetch('/detect', { method: 'POST', body: formData });
+                const res  = await fetch('/detect', { method: 'POST', body: fd });
                 const data = await res.json();
                 if (data.success) {
                     resultImage.src = data.detected_image_url;
-                    resultImage.style.display = 'block';
+                    imageResultContainer.style.display = 'flex';
+                    if (data.cam_image_url) {
+                        document.getElementById('cam-result-image').src = data.cam_image_url;
+                        document.getElementById('camResultContainer').style.display = 'flex';
+                    }
+                    renderStats(imageResultText, data);
                 } else {
-                    imageErrorMsg.textContent = data.error || 'Unknown image detection error.';
+                    imageErrorMsg.textContent = data.error || 'Diagnostic protocol failed.';
                     imageErrorMsg.style.display = 'block';
                 }
             } catch (err) {
-                imageErrorMsg.textContent = 'Image detection failed: Network error or server unavailable.';
+                imageErrorMsg.textContent = 'Hardware communication interrupt.';
                 imageErrorMsg.style.display = 'block';
-            } finally {
-                loadingImage.style.display = 'none';
-            }
+            } finally { hideLoader(); }
         });
 
-        videoForm.addEventListener('submit', async function(e) {
+        videoForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            resetDisplay('all');
-            loadingVideo.style.display = 'block';
-            const formData = new FormData();
-            if (videoInput.files.length === 0) {
-                videoErrorMsg.textContent = 'Please select a video file.';
-                videoErrorMsg.style.display = 'block';
-                loadingVideo.style.display = 'none';
-                return;
-            }
-            formData.append('file', videoInput.files[0]);
+            resetDisplay('video');
+            if (!videoInput.files.length) return;
+            showLoader('PROCESSING VISION FEED');
+            const fd = new FormData();
+            fd.append('file', videoInput.files[0]);
             try {
-                const res = await fetch('/detect_video', { method: 'POST', body: formData });
+                const res  = await fetch('/detect_video', { method: 'POST', body: fd });
                 const data = await res.json();
                 if (data.success) {
                     resultVideo.src = data.detected_video_url;
                     resultVideo.load();
-                    resultVideo.style.display = 'block';
+                    videoResultContainer.style.display = 'flex';
+                    renderStats(videoResultText, data);
                 } else {
-                    videoErrorMsg.textContent = data.error || 'Unknown video detection error.';
+                    videoErrorMsg.textContent = data.error || 'Diagnostic protocol failed.';
                     videoErrorMsg.style.display = 'block';
                 }
             } catch (err) {
-                videoErrorMsg.textContent = 'Video detection failed: Network error or server unavailable.';
+                videoErrorMsg.textContent = 'Vision stream interrupt.';
                 videoErrorMsg.style.display = 'block';
-            } finally {
-                loadingVideo.style.display = 'none';
-            }
+            } finally { hideLoader(); }
         });
     </script>
 </body>
