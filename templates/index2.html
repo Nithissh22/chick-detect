@@ -503,6 +503,9 @@
 </head>
 <body>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" style="position: fixed; top: 32px; right: 32px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;"></div>
+
     <!-- Loading Overlay -->
     <div id="loaderOverlay">
         <div class="spinner"></div>
@@ -525,9 +528,9 @@
         <nav class="nav-menu">
             <a class="nav-item active" onclick="switchTab('dashboard')"><i data-lucide="layout-dashboard"></i> Dashboard</a>
             <a class="nav-item" onclick="switchTab('live')"><i data-lucide="cctv"></i> Live Monitor</a>
-            <a class="nav-item"><i data-lucide="file-bar-chart-2"></i> Reports</a>
-            <a class="nav-item"><i data-lucide="database"></i> Datasets</a>
-            <a class="nav-item"><i data-lucide="settings"></i> Settings</a>
+            <a class="nav-item" onclick="switchTab('reports')"><i data-lucide="file-bar-chart-2"></i> Reports</a>
+            <a class="nav-item" onclick="switchTab('datasets')"><i data-lucide="database"></i> Datasets</a>
+            <a class="nav-item" onclick="switchTab('settings')"><i data-lucide="settings"></i> Settings</a>
         </nav>
 
         <div class="status-panel">
@@ -552,8 +555,15 @@
             </div>
             <div class="header-actions">
                 <div class="clock" id="liveClock">00:00:00</div>
-                <button class="icon-btn"><i data-lucide="bell"></i></button>
-                <div class="avatar"></div>
+                <button class="icon-btn" onclick="showToast('No new notifications.')"><i data-lucide="bell"></i></button>
+                <div class="avatar-dropdown-wrapper" style="position:relative; cursor:pointer;" onclick="toggleDropdown('profileDropdown')">
+                    <div class="avatar"></div>
+                    <div id="profileDropdown" style="display:none; position:absolute; right:0; top:50px; background:var(--bg-secondary); border:1px solid var(--border-color); padding:12px; border-radius:12px; width:150px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:100;">
+                        <div style="font-weight:600; margin-bottom:8px;">Admin User</div>
+                        <hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;">
+                        <a href="#" style="color:var(--text-secondary); text-decoration:none; font-size:0.9rem;">Sign Out</a>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -670,8 +680,8 @@
                                 <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">
                                     <i data-lucide="refresh-cw"></i> Scan New
                                 </button>
-                                <button class="btn-secondary" style="border-color: var(--gold-primary); color: var(--gold-primary);">
-                                    <i data-lucide="download"></i> PDF Report
+                                <button class="btn-secondary" style="border-color: var(--gold-primary); color: var(--gold-primary);" onclick="window.print()">
+                                    <i data-lucide="download"></i> Print / PDF Report
                                 </button>
                             </div>
                         </div>
@@ -779,6 +789,45 @@
                  
              </div>
         </div>
+
+        <!-- REPORTS VIEW -->
+        <div class="dashboard-content" id="reportsView" style="display: none; grid-template-columns: 1fr;">
+            <div class="glass" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                <i data-lucide="file-bar-chart-2" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; display: inline-block;"></i>
+                <h2>Generated Reports</h2>
+                <p>No historical reports found. Run a scan to generate a report.</p>
+            </div>
+        </div>
+
+        <!-- DATASETS VIEW -->
+        <div class="dashboard-content" id="datasetsView" style="display: none; grid-template-columns: 1fr;">
+            <div class="glass" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                <i data-lucide="database" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; display: inline-block;"></i>
+                <h2>Neural Datasets</h2>
+                <p>Dataset management requires Administrator privileges.</p>
+            </div>
+        </div>
+
+        <!-- SETTINGS VIEW -->
+        <div class="dashboard-content" id="settingsView" style="display: none; grid-template-columns: 1fr;">
+            <div class="glass" style="padding: 40px; color: var(--text-secondary);">
+                <h2 style="color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;"><i data-lucide="settings"></i> System Settings</h2>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <span>YOLOv5 Model Weights</span>
+                        <span style="color: var(--gold-primary);">chick_best.pt (Active)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <span>Hardware Acceleration</span>
+                        <span style="color: var(--green);">CPU Optimized</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Confidence Threshold</span>
+                        <span style="color: var(--text-primary);">0.25</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -791,18 +840,39 @@
             document.getElementById('liveClock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
         }, 1000);
 
+        // UI Helpers
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'glass animate-fade-up';
+            toast.style.padding = '12px 24px';
+            toast.style.background = 'rgba(212,175,55,0.1)';
+            toast.style.border = '1px solid var(--gold-primary)';
+            toast.style.color = 'var(--text-primary)';
+            toast.innerHTML = `<i data-lucide="info" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 8px;"></i>${message}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
+        }
+
         // Tab Switching
         function switchTab(tab) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
-            if (tab === 'dashboard') {
-                document.getElementById('dashboardView').style.display = 'grid';
-                document.getElementById('liveView').style.display = 'none';
-            } else if (tab === 'live') {
-                document.getElementById('dashboardView').style.display = 'none';
-                document.getElementById('liveView').style.display = 'block';
-            }
+            const views = ['dashboardView', 'liveView', 'reportsView', 'datasetsView', 'settingsView'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.style.display = 'none';
+            });
+
+            const activeView = document.getElementById(tab + 'View');
+            if (activeView) activeView.style.display = tab === 'dashboard' ? 'grid' : 'block';
         }
 
         // File Drag & Drop

@@ -80,9 +80,9 @@ try:
     if device.type != 'cpu':
         model.half()  # Speed: Use FP16 if on GPU
     
-    model.conf = 0.20      # Lowered from 0.25 to capture more chickens
-    model.iou = 0.45       # Aggressive IOU (0.45) to merge overlapping detections
-    model.max_det = 1000   # Support large numbers of chicks
+    model.conf = 0.35      # Increased for better accuracy and fewer false positives
+    model.iou = 0.50       # Tuned IOU for better bounding box accuracy
+    model.max_det = 1500   # Support large numbers of chicks
     # Normalize model.names to a dict for consistent access
     if isinstance(model.names, list):
         model.names = {i: n for i, n in enumerate(model.names)}
@@ -143,7 +143,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def get_tiled_detections(img, model, tile_size=(640, 640), overlap=0.25):
+def get_tiled_detections(img, model, tile_size=(640, 640), overlap=0.25, augment=False):
     """
     Slicing Aided Hyper Inference (SAHI) style tiling for high density.
     Optimized with Batch Inference for 3-5x speedup.
@@ -183,7 +183,7 @@ def get_tiled_detections(img, model, tile_size=(640, 640), overlap=0.25):
 
     # BATCH INFERENCE: The most critical optimization
     # YOLOv5 handles a list of images efficiently
-    results = model(tiles)
+    results = model(tiles, augment=augment)
     
     # Process batch results
     # results.pandas().xyxy is a list of DataFrames for each image in batch
@@ -248,7 +248,8 @@ def detect_image():
             target_cam_class_id = int(target_cam_class_id)
         
         # Use Tiled Inference for Image too to improve accuracy on small/close subjects
-        detections = get_tiled_detections(full_res_rgb, model)
+        # Increased overlap to 0.5 and enabled augment=True for maximum accuracy
+        detections = get_tiled_detections(full_res_rgb, model, overlap=0.5, augment=True)
         print(f"DEBUG: Tiled Detections count: {len(detections)}")
 
         # The 'detections' object is already created by get_tiled_detections
