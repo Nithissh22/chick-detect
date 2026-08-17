@@ -14,8 +14,39 @@ import pandas as pd
 from supervision.tracker.byte_tracker.core import ByteTrack
 from yolo_cam import generate_cam_heatmap
 from flask import Response
+import json
+from datetime import datetime
 
 app = Flask(__name__)
+
+HISTORY_FILE = 'scan_history.json'
+
+def log_scan(filename, is_video, total_count, unhealthy_count, primary_diagnosis, final_url):
+    try:
+        history = []
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                try:
+                    history = json.load(f)
+                except:
+                    pass
+        
+        entry = {
+            'id': str(time.time()),
+            'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'filename': filename,
+            'type': 'video' if is_video else 'image',
+            'total_count': total_count,
+            'unhealthy_count': unhealthy_count,
+            'primary_diagnosis': primary_diagnosis,
+            'url': final_url
+        }
+        history.insert(0, entry) # prepend
+        
+        with open(HISTORY_FILE, 'w') as f:
+            json.dump(history[:50], f) # Keep last 50
+    except Exception as e:
+        print(f"Error logging scan: {e}")
 
 # Color mapping for diseases
 COLOR_MAP = {
@@ -369,6 +400,9 @@ def detect_image():
                 primary_diag = 'Potential: Coccidiosis / NCD / Salmonella'
         else:
             primary_diag = 'Healthy'
+            
+        final_img_url = f'/static/detections/{output_filename}'
+        log_scan(filename, False, total_count, sick_count, primary_diag, final_img_url)
 
         return jsonify({
             'success': True,
@@ -571,6 +605,9 @@ def detect_video():
 
         # Build comprehensive disease info for video summary
         disease_info_to_return = {k: DISEASE_INFO.get(k, {}) for k in DISEASE_INFO.keys()}
+        primary_diag = 'Suspected: Coccidiosis / NCD / Salmonella' if sick_count > 0 else 'Healthy'
+        
+        log_scan(filename, True, total_count, sick_count, primary_diag, final_video_url)
 
         return jsonify({
             'success': True,
@@ -720,6 +757,55 @@ def generate_frames():
         camera.release()
         print("📷 Camera released.")
 
+
+@app.route('/api/reports')
+def get_reports():
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                history = json.load(f)
+            return jsonify({'success': True, 'reports': history})
+    except Exception as e:
+        pass
+    return jsonify({'success': True, 'reports': []})
+
+@app.route('/api/settings', methods=['GET', 'POST'])
+def api_settings():
+    global model
+    if request.method == 'GET':
+        return jsonify({
+            'success': True,
+            'conf': model.conf if model else 0.25,
+            'iou': model.iou if model else 0.45,
+            'device': str(model.device) if model else 'unknown'
+        })
+    else:
+        if not model:
+            return jsonify({'success': False, 'error': 'Model not loaded'}), 500
+        data = request.json
+        if 'conf' in data:
+            model.conf = float(data['conf'])
+        if 'iou' in data:
+            model.iou = float(data['iou'])
+        return jsonify({'success': True})
+
+@app.route('/api/datasets')
+def api_datasets():
+    try:
+        images_path = os.path.join(os.path.dirname(__file__), 'data_training', 'images')
+        labels_path = os.path.join(os.path.dirname(__file__), 'data_training', 'labels')
+        
+        img_count = len(os.listdir(images_path)) if os.path.exists(images_path) else 0
+        lbl_count = len(os.listdir(labels_path)) if os.path.exists(labels_path) else 0
+        
+        return jsonify({
+            'success': True,
+            'images': img_count,
+            'labels': lbl_count,
+            'active_model': 'chick_best.pt'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/video_feed')
 def video_feed():

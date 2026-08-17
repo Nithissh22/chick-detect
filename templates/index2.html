@@ -479,18 +479,43 @@
         }
         .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: var(--gold-primary); }
 
-        /* Loader Overlay */
+        /* Premium Loader Overlay */
         #loaderOverlay {
-            position: fixed; inset: 0; background: rgba(8,8,8,0.85); backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(4,4,4,0.92); backdrop-filter: blur(15px);
             z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center;
         }
-        .spinner {
-            width: 64px; height: 64px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--gold-primary);
-            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px;
+        .ai-core {
+            position: relative; width: 120px; height: 120px; margin-bottom: 32px;
+            display: flex; align-items: center; justify-content: center;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-text { font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-primary); }
-        .loader-sub { font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px; }
+        .core-ring { position: absolute; border-radius: 50%; border: 3px solid transparent; }
+        .core-ring-1 {
+            width: 100%; height: 100%; border-top-color: var(--gold-primary); border-bottom-color: var(--gold-primary);
+            animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+        .core-ring-2 {
+            width: 70%; height: 70%; border-left-color: var(--green); border-right-color: var(--green);
+            animation: spin-reverse 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+        .core-dot {
+            width: 20px; height: 20px; background: var(--gold-primary); border-radius: 50%;
+            box-shadow: 0 0 20px var(--gold-primary), 0 0 40px var(--gold-primary);
+            animation: pulse-dot 1s ease-in-out infinite alternate;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+        @keyframes pulse-dot { 0% { transform: scale(0.8); opacity: 0.6; } 100% { transform: scale(1.3); opacity: 1; } }
+        
+        .loader-text {
+            font-size: 1.4rem; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+            background: linear-gradient(90deg, var(--gold-primary), var(--green), var(--gold-primary));
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text;
+            animation: gradient-shift 3s linear infinite;
+        }
+        .loader-sub { font-size: 0.95rem; color: var(--text-secondary); margin-top: 12px; letter-spacing: 1px; font-family: monospace; }
+        .loader-sub::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes gradient-shift { to { background-position: 200% center; } }
+        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
 
         /* Error Banner */
         #errorBanner {
@@ -508,9 +533,13 @@
 
     <!-- Loading Overlay -->
     <div id="loaderOverlay">
-        <div class="spinner"></div>
-        <div class="loader-text">Neural Network Processing</div>
-        <div class="loader-sub">Analyzing visual data layers...</div>
+        <div class="ai-core">
+            <div class="core-ring core-ring-1"></div>
+            <div class="core-ring core-ring-2"></div>
+            <div class="core-dot"></div>
+        </div>
+        <div class="loader-text">Neural Engine Active</div>
+        <div class="loader-sub">Processing diagnostic matrix</div>
     </div>
 
     <!-- LEFT SIDEBAR -->
@@ -561,7 +590,7 @@
                     <div id="profileDropdown" style="display:none; position:absolute; right:0; top:50px; background:var(--bg-secondary); border:1px solid var(--border-color); padding:12px; border-radius:12px; width:150px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:100;">
                         <div style="font-weight:600; margin-bottom:8px;">Admin User</div>
                         <hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;">
-                        <a href="#" style="color:var(--text-secondary); text-decoration:none; font-size:0.9rem;">Sign Out</a>
+                        <a href="#" onclick="location.reload()" style="color:var(--text-secondary); text-decoration:none; font-size:0.9rem;">Sign Out</a>
                     </div>
                 </div>
             </div>
@@ -792,39 +821,53 @@
 
         <!-- REPORTS VIEW -->
         <div class="dashboard-content" id="reportsView" style="display: none; grid-template-columns: 1fr;">
-            <div class="glass" style="padding: 40px; text-align: center; color: var(--text-secondary);">
-                <i data-lucide="file-bar-chart-2" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; display: inline-block;"></i>
-                <h2>Generated Reports</h2>
-                <p>No historical reports found. Run a scan to generate a report.</p>
+            <div class="glass" style="padding: 40px; color: var(--text-primary);">
+                <h2 style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px;"><i data-lucide="file-bar-chart-2"></i> Scan History</h2>
+                <div id="reportsContainer" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="text-align: center; color: var(--text-secondary); padding: 20px;">Loading history...</div>
+                </div>
             </div>
         </div>
 
         <!-- DATASETS VIEW -->
         <div class="dashboard-content" id="datasetsView" style="display: none; grid-template-columns: 1fr;">
-            <div class="glass" style="padding: 40px; text-align: center; color: var(--text-secondary);">
-                <i data-lucide="database" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5; display: inline-block;"></i>
-                <h2>Neural Datasets</h2>
-                <p>Dataset management requires Administrator privileges.</p>
+            <div class="glass" style="padding: 40px; color: var(--text-primary);">
+                <h2 style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px;"><i data-lucide="database"></i> Neural Datasets</h2>
+                <div class="stat-grid" id="datasetsContainer">
+                    <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary);">Loading datasets...</div>
+                </div>
             </div>
         </div>
 
         <!-- SETTINGS VIEW -->
         <div class="dashboard-content" id="settingsView" style="display: none; grid-template-columns: 1fr;">
-            <div class="glass" style="padding: 40px; color: var(--text-secondary);">
-                <h2 style="color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;"><i data-lucide="settings"></i> System Settings</h2>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="glass" style="padding: 40px; color: var(--text-primary);">
+                <h2 style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px;"><i data-lucide="settings"></i> System Settings</h2>
+                <div style="display: flex; flex-direction: column; gap: 24px;">
                     <div style="display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
                         <span>YOLOv5 Model Weights</span>
-                        <span style="color: var(--gold-primary);">chick_best.pt (Active)</span>
+                        <span style="color: var(--gold-primary);" id="activeModelName">chick_best.pt (Active)</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
-                        <span>Hardware Acceleration</span>
-                        <span style="color: var(--green);">CPU Optimized</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Confidence Threshold</span>
-                        <span style="color: var(--text-primary);">0.25</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <input type="range" id="setConf" min="0.01" max="1.0" step="0.01" style="width: 200px;" oninput="document.getElementById('setConfVal').innerText = this.value">
+                            <span id="setConfVal" style="width: 40px; text-align: right;">0.35</span>
+                        </div>
                     </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <span>IOU Threshold</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <input type="range" id="setIou" min="0.01" max="1.0" step="0.01" style="width: 200px;" oninput="document.getElementById('setIouVal').innerText = this.value">
+                            <span id="setIouVal" style="width: 40px; text-align: right;">0.50</span>
+                        </div>
+                    </div>
+                    
+                    <button class="analyze-btn" style="width: auto; align-self: flex-end; margin-top: 0;" onclick="saveSettings()">
+                        <i data-lucide="save"></i> Save Configuration
+                    </button>
                 </div>
             </div>
         </div>
@@ -873,6 +916,86 @@
 
             const activeView = document.getElementById(tab + 'View');
             if (activeView) activeView.style.display = tab === 'dashboard' ? 'grid' : 'block';
+
+            if (tab === 'reports') fetchReports();
+            if (tab === 'datasets') fetchDatasets();
+            if (tab === 'settings') fetchSettings();
+        }
+
+        async function fetchReports() {
+            try {
+                const res = await fetch('/api/reports');
+                const data = await res.json();
+                const container = document.getElementById('reportsContainer');
+                if (data.success && data.reports.length > 0) {
+                    container.innerHTML = data.reports.map(r => `
+                        <div style="display: flex; gap: 16px; padding: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 12px; align-items: center;">
+                            <img src="${r.url || ''}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 1.1rem; color: ${r.unhealthy_count > 0 ? 'var(--red)' : 'var(--green)'}">${r.primary_diagnosis}</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">${r.date} &bull; ${r.filename}</div>
+                                <div style="font-size: 0.85rem; margin-top: 4px;">Total Indexed: ${r.total_count} | Anomalies: <span style="color:var(--red);">${r.unhealthy_count}</span></div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No historical reports found. Run a scan to generate a report.</div>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function fetchDatasets() {
+            try {
+                const res = await fetch('/api/datasets');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('datasetsContainer').innerHTML = `
+                        <div class="sg-box">
+                            <div class="sg-label">Training Images</div>
+                            <div class="sg-val">${data.images}</div>
+                        </div>
+                        <div class="sg-box">
+                            <div class="sg-label">Label Annotations</div>
+                            <div class="sg-val">${data.labels}</div>
+                        </div>
+                        <div class="sg-box" style="grid-column: 1 / -1; margin-top: 16px;">
+                            <div class="sg-label">Active Model Profile</div>
+                            <div class="sg-val" style="font-size: 1.2rem; color: var(--gold-primary);">${data.active_model}</div>
+                        </div>
+                    `;
+                }
+            } catch (err) {}
+        }
+
+        async function fetchSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('setConf').value = data.conf;
+                    document.getElementById('setConfVal').innerText = data.conf;
+                    document.getElementById('setIou').value = data.iou;
+                    document.getElementById('setIouVal').innerText = data.iou;
+                }
+            } catch (err) {}
+        }
+
+        async function saveSettings() {
+            const conf = document.getElementById('setConf').value;
+            const iou = document.getElementById('setIou').value;
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({conf: conf, iou: iou})
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Settings saved to core successfully.');
+                }
+            } catch(err) {}
         }
 
         // File Drag & Drop
